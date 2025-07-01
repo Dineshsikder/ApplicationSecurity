@@ -1,0 +1,136 @@
+# Java / Maven / Spring Boot
+admin-service/target/
+admin-service/out/
+admin-service/.classpath
+admin-service/.project
+admin-service/.settings/
+
+api-gateway/target/
+api-gateway/out/
+api-gateway/.classpath
+api-gateway/.project
+api-gateway/.settings/
+
+auth-server/target/
+auth-server/out/
+auth-server/.classpath
+auth-server/.project
+auth-server/.settings/
+
+resource-server/target/
+resource-server/out/
+resource-server/.classpath
+resource-server/.project
+resource-server/.settings/
+
+user-service/target/
+user-service/out/
+user-service/.classpath
+user-service/.project
+user-service/.settings/
+
+.idea/
+.vscode/
+.DS_Store
+logs/
+log/
+*.log
+build/
+bin/
+.gradle/
+.mvn/
+mvnw*
+.env
+.env.*
+.history
+.cache/
+.tmp/
+tmp/
+test-output/
+.testcontainers/
+
+# Node / React
+frontend/node_modules/
+frontend/build/
+frontend/.env
+frontend/.env.*
+frontend/.next/
+frontend/.cache/
+frontend/.turbo/
+
+# OS
+Thumbs.db
+.DS_Store
+ehthumbs.db
+Icon?
+
+# Misc
+*.iml
+*.swp
+*.swo
+*.bak
+*.tmp
+*.orig
+*.rej
+*.class
+*.jar
+*.war
+*.ear
+*.db
+*.sqlite
+*.h2.db
+*.log
+*.pid
+*.seed
+*.gz
+*.zip
+*.tar
+*.tgz
+*.7z
+*.bak
+*.old
+*.orig
+*.rej
+
+# Coverage
+**/coverage/
+**/jacoco.exec
+**/test-results/
+**/surefire-reports/
+**/build/reports/
+
+# Local config
+**/local.properties
+**/application-local.yml
+**/application-local.properties
+**/application-dev.yml
+**/application-dev.properties
+**/application-test.yml
+**/application-test.properties
+
+# IntelliJ
+*.iws
+*.ipr
+.idea/
+
+# VSCode
+.vscode/
+
+# Yarn
+frontend/yarn.lock
+
+# npm
+frontend/package-lock.json
+
+# Mac
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# Others
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log* 

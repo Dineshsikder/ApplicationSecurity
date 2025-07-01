@@ -1,0 +1,205 @@
+/* Global CSS Overrides for Full-Width Layout */
+
+/* Override all container max-width constraints */
+.container,
+.home-container,
+.how-it-works-container,
+.provider-guides-container,
+.faq-container,
+.microservice-patterns-container,
+.devsecops-container,
+.agenda-container,
+.admin-container,
+.user-container,
+.profile-container,
+.auth-container,
+.callback-container,
+.silent-renew-container,
+.loading-container {
+  max-width: none !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  padding: 20px !important;
+}
+
+/* Ensure navbar uses full width */
+.navbar,
+.navbar-container {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* Ensure footer uses full width */
+.footer,
+.footer-content,
+.footer-bottom-content {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* Ensure main content uses full width */
+.main-content {
+  width: 100% !important;
+  max-width: none !important;
+  padding: 40px !important;
+}
+
+/* Improve spacing for better visual appeal */
+.hero-section {
+  padding: 80px 60px !important;
+  margin-bottom: 60px !important;
+}
+
+.hero-title {
+  font-size: clamp(2.5rem, 6vw, 4rem) !important;
+  margin-bottom: 30px !important;
+}
+
+.hero-subtitle {
+  font-size: clamp(1.1rem, 3vw, 1.5rem) !important;
+  margin-bottom: 40px !important;
+}
+
+.section-title {
+  font-size: clamp(2rem, 5vw, 3rem) !important;
+  margin-bottom: 40px !important;
+}
+
+/* Improve grid spacing */
+.grid,
+.features-grid,
+.actions-grid,
+.security-grid,
+.providers-grid,
+.faq-grid,
+.implementation-grid,
+.practices-grid {
+  gap: 30px !important;
+}
+
+/* Improve card spacing */
+.card,
+.feature-card,
+.action-card,
+.security-card,
+.provider-card,
+.faq-card,
+.implementation-card,
+.practice-card {
+  padding: 30px !important;
+  margin-bottom: 30px !important;
+}
+
+/* Improve button spacing */
+.btn,
+.control-btn,
+.category-btn,
+.link-btn {
+  padding: 15px 30px !important;
+  font-size: 1.1rem !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .main-content {
+    padding: 30px !important;
+  }
+  
+  .hero-section {
+    padding: 60px 40px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 20px !important;
+  }
+  
+  .container,
+  .home-container,
+  .how-it-works-container,
+  .provider-guides-container,
+  .faq-container,
+  .microservice-patterns-container,
+  .devsecops-container,
+  .agenda-container,
+  .admin-container,
+  .user-container,
+  .profile-container,
+  .auth-container,
+  .callback-container,
+  .silent-renew-container,
+  .loading-container {
+    padding: 15px !important;
+  }
+  
+  .hero-section {
+    padding: 50px 30px !important;
+  }
+  
+  .card,
+  .feature-card,
+  .action-card,
+  .security-card,
+  .provider-card,
+  .faq-card,
+  .implementation-card,
+  .practice-card {
+    padding: 25px !important;
+  }
+  
+  .btn,
+  .control-btn,
+  .category-btn,
+  .link-btn {
+    padding: 12px 25px !important;
+    font-size: 1rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 15px !important;
+  }
+  
+  .container,
+  .home-container,
+  .how-it-works-container,
+  .provider-guides-container,
+  .faq-container,
+  .microservice-patterns-container,
+  .devsecops-container,
+  .agenda-container,
+  .admin-container,
+  .user-container,
+  .profile-container,
+  .auth-container,
+  .callback-container,
+  .silent-renew-container,
+  .loading-container {
+    padding: 10px !important;
+  }
+  
+  .hero-section {
+    padding: 40px 20px !important;
+  }
+  
+  .card,
+  .feature-card,
+  .action-card,
+  .security-card,
+  .provider-card,
+  .faq-card,
+  .implementation-card,
+  .practice-card {
+    padding: 20px !important;
+  }
+  
+  .btn,
+  .control-btn,
+  .category-btn,
+  .link-btn {
+    padding: 10px 20px !important;
+    font-size: 0.9rem !important;
+  }
+} 

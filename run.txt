@@ -1,0 +1,22 @@
+🚀 Getting Started
+To run the complete application:
+Start Redis:
+Apply to pom.xml
+Run
+Start Backend Services:
+Apply to pom.xml
+Run
+Start Frontend:
+Apply to pom.xml
+Run
+Test the Application:
+Visit http://localhost:3000
+Login with user/password or admin/admin
+Explore all features and API endpoints
+
+$env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-21.0.6.7-hotspot"
+
+mvn clean package -DskipTests
+cd api-gateway; mvn clean compile
+
+mvn spring-boot:run
