@@ -44,6 +44,7 @@ import FAQ from './components/FAQ';
 import Callback from './components/Callback';
 import SilentRenew from './components/SilentRenew';
 import Loading from './components/Loading';
+import OAuthFundamentals from './components/OAuthFundamentals';
 import './App.css';
 
 // Protected Route Component
@@ -79,6 +80,7 @@ const App = () => {
           <Route path="/auth" element={
             isAuthenticated() ? <Navigate to="/dashboard" replace /> : <Auth />
           } />
+          <Route path="/fundamentals" element={<OAuthFundamentals />} />
           <Route path="/agenda" element={<Agenda />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/provider-guides" element={<ProviderGuides />} />

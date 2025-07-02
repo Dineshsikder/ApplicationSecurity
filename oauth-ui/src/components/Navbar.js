@@ -31,6 +31,7 @@ const Navbar = () => {
     { path: '/', icon: '🏠', label: 'Home', tooltip: 'Home' },
     { path: '/agenda', icon: '📋', label: 'Agenda', tooltip: 'Presentation Agenda' },
     { path: '/how-it-works', icon: '❓', label: 'How It Works', tooltip: 'How OAuth2 Works' },
+    { path: '/fundamentals', icon: '🔐', label: 'OAuth Fundamentals', tooltip: 'OAuth2 & OIDC Fundamentals' },
     { path: '/provider-guides', icon: '📚', label: 'Provider Guides', tooltip: 'OAuth Provider Guides' },
     { path: '/microservice-patterns', icon: '🔗', label: 'Microservice Patterns', tooltip: 'Microservice Patterns' },
     { path: '/devsecops', icon: '🔒', label: 'DevSecOps', tooltip: 'DevOps & DevSecOps' },
