@@ -42,31 +42,31 @@ spring:
           max-wait: -1ms
 
   # Security configuration
-  security:
-    oauth2:
-      authorizationserver:
-        issuer: http://localhost:9000
-        client:
-          registration:
-            react-client:
-              client-id: react-client
-              client-secret: "{noop}secret"
-              client-authentication-methods:
-                - "client_secret_basic"
-              authorization-grant-types:
-                - "authorization_code"
-                - "refresh_token"
-              redirect-uris:
-                - "http://localhost:3000/callback"
-              scopes:
-                - "openid"
-                - "profile"
-                - "api.read"
-                - "api.write"
-              require-authorization-consent: true
-              client-settings:
-                require-proof-key: true  # Enforce PKCE
-                require-authorization-consent: true
+  # security:
+  #   oauth2:
+  #     authorizationserver:
+  #       issuer: http://localhost:9000
+  #       client:
+  #         registration:
+  #           react-client:
+  #             client-id: react-client
+  #             client-secret: "{noop}secret"
+  #             client-authentication-methods:
+  #               - "client_secret_basic"
+  #             authorization-grant-types:
+  #               - "authorization_code"
+  #               - "refresh_token"
+  #             redirect-uris:
+  #               - "http://localhost:3000/callback"
+  #             scopes:
+  #               - "openid"
+  #               - "profile"
+  #               - "api.read"
+  #               - "api.write"
+  #             require-authorization-consent: true
+  #             client-settings:
+  #               require-proof-key: true  # Enforce PKCE
+  #               require-authorization-consent: true
 
 # Actuator endpoints for monitoring
 management:
@@ -83,9 +83,30 @@ logging:
   level:
     org.springframework.security: DEBUG
     org.springframework.security.oauth2: DEBUG
-    com.example.authserver: DEBUG
+    org.springframework.security.oauth2.server: DEBUG
+    org.springframework.security.oauth2.server.authorization: DEBUG
+    org.springframework.security.oauth2.server.resource: DEBUG
+    org.springframework.security.web: DEBUG
+    org.springframework.security.web.authentication: DEBUG
+    org.springframework.security.web.filter: DEBUG
+    org.springframework.security.web.access: DEBUG
+    org.springframework.security.web.context: DEBUG
+    org.springframework.security.web.FilterChainProxy: DEBUG
+    org.springframework.security.web.util.matcher: DEBUG
+    org.springframework.security.oauth2.server.resource.authentication: DEBUG
+    org.springframework.security.oauth2.server.resource.introspection: DEBUG
+    org.springframework.security.oauth2.server.resource.web: DEBUG
+    org.springframework.security.oauth2.server.resource.web.authentication: DEBUG
+    org.springframework.security.oauth2.jwt: DEBUG
+    org.springframework.security.oauth2.jose: DEBUG
+    org.springframework.web.servlet.mvc.method.annotation: DEBUG
+    org.springframework.web.servlet.DispatcherServlet: DEBUG
+    org.springframework.web.filter: DEBUG
+    com.oauth.auth_server: DEBUG
+    com.oauth.auth_server.controller: DEBUG
+    com.oauth.auth_server.config: DEBUG
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
 # JWT Configuration
 jwt:

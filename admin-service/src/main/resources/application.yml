@@ -25,4 +25,12 @@ spring:
 logging:
   level:
     com.api.adminservice: DEBUG
-    org.springframework.security: DEBUG 
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
+    org.springframework.security.oauth2.server: DEBUG
+    org.springframework.security.oauth2.server.resource: DEBUG
+    org.springframework.security.web: DEBUG
+    org.springframework.security.web.authentication: DEBUG
+    org.springframework.security.web.filter: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n" 

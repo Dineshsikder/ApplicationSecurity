@@ -46,4 +46,26 @@ public class FallbackController {
         
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
     }
+
+    @GetMapping("/user")
+    public ResponseEntity<Map<String, Object>> userServiceFallback() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", "SERVICE_UNAVAILABLE");
+        response.put("message", "User Service is currently unavailable");
+        response.put("error", "SERVICE_DOWN");
+        
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
+    }
+
+    @GetMapping("/admin")
+    public ResponseEntity<Map<String, Object>> adminServiceFallback() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", "SERVICE_UNAVAILABLE");
+        response.put("message", "Admin Service is currently unavailable");
+        response.put("error", "SERVICE_DOWN");
+        
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
+    }
 } 

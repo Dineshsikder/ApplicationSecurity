@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/admin")
 @CrossOrigin(origins = "*")
 public class AdminController {
 
@@ -21,25 +21,25 @@ public class AdminController {
     private AdminService adminService;
 
     @GetMapping("/architecture")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<SystemArchitecture> getSystemArchitecture() {
         return ResponseEntity.ok(adminService.getSystemArchitecture());
     }
 
     @GetMapping("/metrics")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<SystemMetrics> getSystemMetrics() {
         return ResponseEntity.ok(adminService.getSystemMetrics());
     }
 
     @GetMapping("/users")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<UserManagement> getUserManagement() {
         return ResponseEntity.ok(adminService.getUserManagement());
     }
 
     @GetMapping("/dashboard")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Map<String, Object>> getAdminDashboard() {
         Map<String, Object> dashboard = new HashMap<>();
         dashboard.put("architecture", adminService.getSystemArchitecture());
@@ -51,7 +51,7 @@ public class AdminController {
     }
 
     @PostMapping("/users/{userId}/role")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> updateUserRole(@PathVariable Long userId, @RequestBody Map<String, String> roleRequest) {
         try {
             String newRole = roleRequest.get("role");
@@ -65,19 +65,19 @@ public class AdminController {
     }
 
     @GetMapping("/security/audit")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> getSecurityAudit() {
         return ResponseEntity.ok(adminService.getSecurityAudit());
     }
 
     @GetMapping("/system/health")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> getSystemHealth() {
         return ResponseEntity.ok(adminService.getSystemHealth());
     }
 
     @GetMapping("/oauth/configuration")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> getOAuthConfiguration() {
         return ResponseEntity.ok(adminService.getOAuthConfiguration());
     }

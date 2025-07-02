@@ -1,17 +1,6 @@
-🚀 Getting Started
-To run the complete application:
-Start Redis:
-Apply to pom.xml
-Run
-Start Backend Services:
-Apply to pom.xml
-Run
-Start Frontend:
-Apply to pom.xml
-Run
-Test the Application:
+
 Visit http://localhost:3000
-Login with user/password or admin/admin
+Login with user/password or admin/password
 Explore all features and API endpoints
 
 $env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-21.0.6.7-hotspot"
@@ -20,3 +9,53 @@ mvn clean package -DskipTests
 cd api-gateway; mvn clean compile
 
 mvn spring-boot:run
+
+
+
+How to use CLIENT_SECRET_BASIC:
+1. Keep this in your backend:
+Apply to ClientConfig...
+2. In your frontend OIDC config:
+You must provide the client_secret when exchanging the code for a token.
+Most OIDC libraries for SPAs do not support sending the client secret (for security reasons).
+If you try to use this in a React SPA, the secret will be visible in the browser and can be stolen.
+3. If you still want to do it (for testing only):
+You must use a library or custom code that sends the client_id and client_secret in the Authorization header (base64 encoded) when calling /oauth2/token.
+Example (using curl):
+Apply to ClientConfig...
+In a backend app, you can do this securely. In a browser, do not do this in production.
+Summary Table
+Use Case	clientAuthenticationMethod	clientSecret	Where to use?
+SPA (React)	NONE	No	Browser (PKCE only)
+Server-side app	CLIENT_SECRET_BASIC	Yes	Backend only
+Best Practice
+For SPAs: Use ClientAuthenticationMethod.NONE with PKCE (no secret).
+For server-side apps: Use ClientAuthenticationMethod.CLIENT_SECRET_BASIC with a secret.
+
+
+Best Practice: Where to Put User Info in OAuth2/OIDC
+1. Access Token / ID Token
+Access Token:
+Should contain only the minimal information needed for resource access (usually just scopes, subject/user id, and maybe roles).
+Do not put sensitive or excessive user info in the access token.
+ID Token:
+Can contain user profile claims (like email, name, etc.) if requested via OIDC scopes (profile, email).
+This is the standard way to deliver user info to the client after authentication.
+2. /userinfo Endpoint
+The /userinfo endpoint is the OIDC standard for retrieving the full user profile.
+The client can call /userinfo with the access token to get up-to-date user claims.
+Why Not Put All User Info in the Token?
+Security:
+Tokens are often long-lived and can be intercepted. Less info = less risk.
+Size:
+Large tokens can cause performance and header size issues.
+Freshness:
+User info in tokens can become stale. /userinfo always returns the latest data.
+Audience:
+Access tokens are for APIs, not for the client to parse user details.
+Best Practice Summary
+Put minimal info in access tokens.
+Put profile claims in the ID token if needed by the client.
+Use /userinfo for full, up-to-date user info.
+TL;DR:
+It is best practice to put only minimal, non-sensitive info in tokens. Use the ID token for basic profile info, and /userinfo for the full user profile.

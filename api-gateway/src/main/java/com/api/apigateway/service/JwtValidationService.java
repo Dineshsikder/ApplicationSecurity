@@ -9,25 +9,23 @@ import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.net.URL;
 import java.text.ParseException;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class JwtValidationService {
 
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    private static final Logger logger = LoggerFactory.getLogger(JwtValidationService.class);
 
-    @Autowired
-    private WebClient webClient;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
     private String issuerUri;
@@ -36,168 +34,150 @@ public class JwtValidationService {
     private String jwkSetUri;
 
     private static final String BLACKLIST_PREFIX = "blacklist:";
-    private static final String INTROSPECTION_PREFIX = "introspection:";
 
-    /**
-     * Validate JWT token against the authorization server
-     */
+    private JWKSet cachedJwkSet;
+
+    public JwtValidationService(RedisTemplate<String, Object> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
+
     public Mono<JWTValidationResult> validateToken(String token) {
         return Mono.fromCallable(() -> {
+            logger.info("Starting JWT validation");
             try {
-                // 1. Check if token is blacklisted
-                if (isTokenBlacklisted(token)) {
+                // Validate JWT signature and claims first
+                JWTClaimsSet claimsSet = validateJwtSignature(token);
+                if (claimsSet == null) {
+                    logger.error("JWT signature or claims invalid");
+                    return new JWTValidationResult(false, "Invalid JWT signature or claims", null, null);
+                }
+
+                // Extract JTI from validated claims
+                String jti = claimsSet.getJWTID();
+                logger.debug("Extracted JTI from validated claims: {}", jti);
+
+                // Check blacklist using the extracted JTI
+                if (isTokenBlacklisted(jti)) {
+                    logger.warn("Token is blacklisted for JTI: {}", jti);
                     return new JWTValidationResult(false, "Token has been revoked", null, null);
                 }
 
-                // 2. Validate JWT signature and claims
-                JWTClaimsSet claimsSet = validateJwtSignature(token);
-                if (claimsSet == null) {
-                    return new JWTValidationResult(false, "Invalid JWT signature", null, null);
-                }
-
-                // 3. Validate token with authorization server (introspection)
-                return validateWithAuthServer(token, claimsSet);
+                logger.info("JWT successfully validated for subject: {}", claimsSet.getSubject());
+                return new JWTValidationResult(true, "Token is valid", claimsSet, extractAuthorities(claimsSet));
 
             } catch (Exception e) {
+                logger.error("JWT validation failed: {}", e.getMessage(), e);
                 return new JWTValidationResult(false, "Token validation failed: " + e.getMessage(), null, null);
             }
         });
     }
 
-    /**
-     * Validate JWT signature using JWK from auth server
-     */
     private JWTClaimsSet validateJwtSignature(String token) {
         try {
-            // Fetch JWK set from auth server
-            JWKSet jwkSet = JWKSet.load(new URL(jwkSetUri));
-            JWKSource<SecurityContext> jwkSource = (jwkSelector, context) -> jwkSelector.select(jwkSet);
+            logger.info("Validating JWT signature and claims");
 
-            // Configure JWT processor
+            if (cachedJwkSet == null) {
+                logger.info("Loading JWK set from URI: {}", jwkSetUri);
+                cachedJwkSet = JWKSet.load(new URL(jwkSetUri));
+                logger.info("JWK set loaded successfully");
+            }
+
+            JWKSource<SecurityContext> jwkSource = (jwkSelector, context) -> jwkSelector.select(cachedJwkSet);
+
             ConfigurableJWTProcessor<SecurityContext> jwtProcessor = new DefaultJWTProcessor<>();
             JWSKeySelector<SecurityContext> keySelector = new JWSVerificationKeySelector<>(JWSAlgorithm.RS256, jwkSource);
             jwtProcessor.setJWSKeySelector(keySelector);
 
-            // Process and validate JWT
-            SecurityContext context = null;
-            JWTClaimsSet claimsSet = jwtProcessor.process(token, context);
+            JWTClaimsSet claimsSet = jwtProcessor.process(token, null);
+
+            logger.debug("JWT claims: {}", claimsSet.toJSONObject());
 
             // Validate issuer
             if (!issuerUri.equals(claimsSet.getIssuer())) {
+                logger.warn("Invalid issuer. Expected: {}, Found: {}", issuerUri, claimsSet.getIssuer());
                 return null;
             }
 
-            // Validate expiration
-            if (claimsSet.getExpirationTime() != null && 
-                claimsSet.getExpirationTime().before(new java.util.Date())) {
+            // Validate audience
+            if (claimsSet.getAudience() == null || !claimsSet.getAudience().contains("api-gateway")) {
+                logger.warn("Invalid audience. Expected to contain: api-gateway, Found: {}", claimsSet.getAudience());
                 return null;
             }
 
+            // Validate expiry
+            Date expiry = claimsSet.getExpirationTime();
+            if (expiry != null && expiry.before(new Date())) {
+                logger.warn("Token expired at {}", expiry);
+                return null;
+            }
+
+            logger.info("JWT signature and claims validation passed");
             return claimsSet;
 
         } catch (Exception e) {
+            logger.error("Error validating JWT signature: {}", e.getMessage(), e);
             return null;
         }
     }
 
-    /**
-     * Validate token with authorization server using introspection endpoint
-     */
-    private JWTValidationResult validateWithAuthServer(String token, JWTClaimsSet claimsSet) {
-        try {
-            // Check cache first
-            String cacheKey = INTROSPECTION_PREFIX + token.hashCode();
-            Boolean cachedResult = (Boolean) redisTemplate.opsForValue().get(cacheKey);
-            if (cachedResult != null) {
-                if (cachedResult) {
-                    return new JWTValidationResult(true, "Token is valid", claimsSet, extractAuthorities(claimsSet));
-                } else {
-                    return new JWTValidationResult(false, "Token is invalid", null, null);
-                }
-            }
-
-            // Call auth server introspection endpoint
-            String introspectionUrl = issuerUri + "/oauth2/introspect";
-            
-            Map<String, Object> response = webClient.post()
-                .uri(introspectionUrl)
-                .header("Authorization", "Bearer " + token)
-                .bodyValue(Map.of("token", token))
-                .retrieve()
-                .bodyToMono(Map.class)
-                .block();
-
-            if (response != null && Boolean.TRUE.equals(response.get("active"))) {
-                // Cache positive result for 5 minutes
-                redisTemplate.opsForValue().set(cacheKey, true, java.time.Duration.ofMinutes(5));
-                return new JWTValidationResult(true, "Token is valid", claimsSet, extractAuthorities(claimsSet));
-            } else {
-                // Cache negative result for 1 minute
-                redisTemplate.opsForValue().set(cacheKey, false, java.time.Duration.ofMinutes(1));
-                return new JWTValidationResult(false, "Token is invalid", null, null);
-            }
-
-        } catch (Exception e) {
-            // Fallback to JWT validation only if introspection fails
-            return new JWTValidationResult(true, "Token validated (introspection unavailable)", claimsSet, extractAuthorities(claimsSet));
-        }
-    }
-
-    /**
-     * Check if token is blacklisted
-     */
-    private boolean isTokenBlacklisted(String token) {
-        String jti = extractJtiFromToken(token);
+    private boolean isTokenBlacklisted(String jti) {
         String key = BLACKLIST_PREFIX + jti;
-        return Boolean.TRUE.equals(redisTemplate.hasKey(key));
+        boolean isBlacklisted = Boolean.TRUE.equals(redisTemplate.hasKey(key));
+        logger.info("Checking blacklist for JTI {}: {}", jti, isBlacklisted);
+        return isBlacklisted;
     }
 
-    /**
-     * Extract JTI from token
-     */
-    private String extractJtiFromToken(String token) {
-        try {
-            JWTClaimsSet claimsSet = JWTClaimsSet.parse(token);
-            return claimsSet.getJWTID();
-        } catch (ParseException e) {
-            return "jti-" + token.hashCode();
-        }
-    }
-
-    /**
-     * Extract authorities from JWT claims
-     */
-    private java.util.List<String> extractAuthorities(JWTClaimsSet claimsSet) {
+    private List<String> extractAuthorities(JWTClaimsSet claimsSet) {
         try {
             Object authorities = claimsSet.getClaim("authorities");
-            if (authorities instanceof java.util.List) {
-                return (java.util.List<String>) authorities;
+            if (authorities instanceof List<?>) {
+                logger.debug("Extracted authorities from claim");
+                return ((List<?>) authorities).stream()
+                        .map(Object::toString)
+                        .toList();
+            }
+
+            // fallback to scopes
+            Object scopes = claimsSet.getClaim("scope");
+            if (scopes instanceof List<?>) {
+                logger.debug("Extracted scopes as authorities from list");
+                return ((List<?>) scopes).stream()
+                        .map(Object::toString)
+                        .toList();
+            } else if (scopes instanceof String) {
+                logger.debug("Extracted scopes as authorities from string");
+                return Arrays.asList(((String) scopes).split(" "));
+            }
+
+        } catch (Exception e) {
+            logger.error("Error extracting authorities: {}", e.getMessage());
+        }
+        return Collections.emptyList();
+    }
+
+    public void blacklistToken(String token) {
+        try {
+            JWTClaimsSet claimsSet = validateJwtSignature(token);
+            if (claimsSet != null) {
+                String jti = claimsSet.getJWTID();
+                String key = BLACKLIST_PREFIX + jti;
+                redisTemplate.opsForValue().set(key, true);
+                logger.info("Token blacklisted with JTI: {}", jti);
+            } else {
+                logger.warn("Could not blacklist token - invalid signature");
             }
         } catch (Exception e) {
-            // Ignore
+            logger.error("Error blacklisting token: {}", e.getMessage());
         }
-        return java.util.List.of();
     }
 
-    /**
-     * Blacklist a token
-     */
-    public void blacklistToken(String token) {
-        String jti = extractJtiFromToken(token);
-        String key = BLACKLIST_PREFIX + jti;
-        redisTemplate.opsForValue().set(key, true, java.time.Duration.ofDays(1));
-    }
-
-    /**
-     * Result of JWT validation
-     */
     public static class JWTValidationResult {
         private final boolean valid;
         private final String message;
         private final JWTClaimsSet claimsSet;
-        private final java.util.List<String> authorities;
+        private final List<String> authorities;
 
-        public JWTValidationResult(boolean valid, String message, JWTClaimsSet claimsSet, java.util.List<String> authorities) {
+        public JWTValidationResult(boolean valid, String message, JWTClaimsSet claimsSet, List<String> authorities) {
             this.valid = valid;
             this.message = message;
             this.claimsSet = claimsSet;
@@ -207,6 +187,6 @@ public class JwtValidationService {
         public boolean isValid() { return valid; }
         public String getMessage() { return message; }
         public JWTClaimsSet getClaimsSet() { return claimsSet; }
-        public java.util.List<String> getAuthorities() { return authorities; }
+        public List<String> getAuthorities() { return authorities; }
     }
-} 
+}

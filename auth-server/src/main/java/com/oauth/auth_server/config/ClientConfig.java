@@ -19,28 +19,56 @@ public class ClientConfig {
 
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
+        // Server-side app
+        // RegisteredClient reactClient = RegisteredClient.withId(UUID.randomUUID().toString())
+        //         .clientId("react-client")
+        //         .clientSecret("{noop}secret") 
+        //         .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+        //         .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+        //         .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+        //         .redirectUri("http://localhost:3000/callback")
+        //         .redirectUri("http://localhost:3000/silent-renew")
+        //         .scope(OidcScopes.OPENID)
+        //         .scope(OidcScopes.PROFILE)
+        //         .scope(OidcScopes.EMAIL)
+        //         .scope("api.read")
+        //         .scope("api.write")
+        //         .clientSettings(ClientSettings.builder()
+        //                 .requireProofKey(true)  // Enforce PKCE
+        //                 .requireAuthorizationConsent(true)
+        //                 .build())
+        //         .tokenSettings(TokenSettings.builder()
+        //                 .accessTokenTimeToLive(Duration.ofMinutes(15))
+        //                 .refreshTokenTimeToLive(Duration.ofDays(1))
+        //                 .build())
+        //         .build();
+
         RegisteredClient reactClient = RegisteredClient.withId(UUID.randomUUID().toString())
-                .clientId("react-client")
-                .clientSecret("{noop}secret")
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .redirectUri("http://localhost:3000/callback")
-                .redirectUri("http://localhost:3000/silent-renew")
-                .scope(OidcScopes.OPENID)
-                .scope(OidcScopes.PROFILE)
-                .scope("api.read")
-                .scope("api.write")
-                .clientSettings(ClientSettings.builder()
-                        .requireProofKey(true)  // Enforce PKCE
-                        .requireAuthorizationConsent(true)
-                        .build())
-                .tokenSettings(TokenSettings.builder()
-                        .accessTokenTimeToLive(Duration.ofMinutes(15))
-                        .refreshTokenTimeToLive(Duration.ofDays(1))
-                        .build())
-                .build();
+        .clientId("react-client")
+        .clientAuthenticationMethod(ClientAuthenticationMethod.NONE) // <-- For SPA/PKCE
+        .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+        .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+        .redirectUri("http://localhost:3000/callback")
+        .redirectUri("http://localhost:3000/silent-renew")
+        .scope(OidcScopes.OPENID)
+        .scope(OidcScopes.PROFILE)
+        .scope(OidcScopes.EMAIL)
+        .scope("api.read")
+        .scope("api.write")
+        .clientSettings(ClientSettings.builder()
+                .requireProofKey(true)  // Enforce PKCE
+                .requireAuthorizationConsent(true)
+                .build())
+        .tokenSettings(TokenSettings.builder()
+                .accessTokenTimeToLive(Duration.ofMinutes(15))
+                .refreshTokenTimeToLive(Duration.ofDays(1))
+                .build())
+        .build();
 
         return new InMemoryRegisteredClientRepository(reactClient);
+
+
     }
+
+    
 } 

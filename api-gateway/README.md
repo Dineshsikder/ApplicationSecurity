@@ -1,410 +1,426 @@
 # API Gateway
 
-A Spring Cloud Gateway that acts as a single entry point for all API requests, providing routing, security, rate limiting, and circuit breaker functionality.
+A Spring Cloud Gateway implementation that serves as the central entry point for all API requests, providing JWT validation, routing, and security features for the OAuth ecosystem.
 
-## Features
+## 🏗️ Architecture
 
-### 🚀 Gateway Features
-- **Request Routing** - Routes requests to appropriate microservices
-- **JWT Validation** - Validates JWT tokens from the Authorization Server
-- **Rate Limiting** - Prevents API abuse with Redis-based rate limiting
-- **Circuit Breaker** - Graceful degradation when services are down
-- **CORS Support** - Cross-origin resource sharing for frontend integration
-- **Load Balancing** - Distributes requests across service instances
-- **Request/Response Transformation** - Modify requests and responses as needed
+The API Gateway acts as a reverse proxy and security layer, routing requests to appropriate microservices while validating JWT tokens and injecting user information. It's built using Spring Cloud Gateway with custom JWT validation filters.
 
-### 🔐 Security Features
-- **JWT Token Validation** - Validates tokens before routing to services
-- **Token Blacklisting** - Checks for revoked tokens using Redis
-- **Route-Based Security** - Different security rules for different routes
-- **CORS Configuration** - Proper cross-origin handling
-- **Request Filtering** - Custom filters for security validation
+## 🚀 Features
 
-### 📊 Monitoring Features
-- **Health Checks** - Service health monitoring
-- **Metrics** - Prometheus metrics export
-- **Actuator Endpoints** - Runtime monitoring and management
-- **Circuit Breaker Monitoring** - Track service availability
+- **Centralized JWT Validation** with automatic token verification
+- **Dynamic Service Routing** to microservices
+- **User Information Injection** into request headers
+- **Token Blacklist Checking** via Redis
+- **Circuit Breaker** for fault tolerance
+- **Rate Limiting** for API protection
+- **CORS Configuration** for frontend integration
+- **Fallback Mechanisms** for service failures
 
-## Quick Start
+## 📁 Project Structure
 
-### Prerequisites
-- Java 17+
-- Maven 3.6+
-- Redis (for rate limiting and token blacklisting)
-- Auth Server running on port 9000
-- Resource Server running on port 8080
-
-### Installation
-
-1. **Clone and build:**
-```bash
-cd api-gateway
-mvn clean install
+```
+api-gateway/
+├── src/main/java/com/api/apigateway/
+│   ├── ApiGatewayApplication.java          # Main application class
+│   ├── config/
+│   │   ├── RedisConfig.java               # Redis configuration
+│   │   ├── SecurityConfig.java            # Security configuration
+│   │   └── WebClientConfig.java           # WebClient configuration
+│   ├── controller/
+│   │   └── FallbackController.java        # Circuit breaker fallback
+│   ├── filter/
+│   │   └── JwtValidationFilter.java       # JWT validation filter
+│   └── service/
+│       └── JwtValidationService.java      # JWT validation logic
+├── src/main/resources/
+│   ├── application.yml                    # Main configuration
+│   └── application-docker.yml             # Docker configuration
+└── Dockerfile                             # Container configuration
 ```
 
-2. **Start Redis:**
-```bash
-# On Windows (if using WSL or Docker)
-docker run -d -p 6379:6379 redis:alpine
+## ⚙️ Configuration
 
-# On macOS
-brew install redis
-brew services start redis
-
-# On Linux
-sudo apt-get install redis-server
-sudo systemctl start redis
-```
-
-3. **Run the application:**
-```bash
-mvn spring-boot:run
-```
-
-The gateway will start on `http://localhost:8000`
-
-## Configuration
-
-### Application Properties
-
-Key configuration in `application.yml`:
+### Gateway Routes
 
 ```yaml
-server:
-  port: 8000
-
 spring:
   cloud:
     gateway:
       routes:
-        # Auth Server routes
+        # Admin Service Route
+        - id: admin-service
+          uri: lb://admin-service
+          predicates:
+            - Path=/api/admin/**
+          filters:
+            - JwtValidationFilter
+            - StripPrefix=1
+            - name: CircuitBreaker
+              args:
+                name: admin-service-circuit-breaker
+                fallbackUri: forward:/fallback/admin
+        
+        # User Service Route
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/user/**
+          filters:
+            - JwtValidationFilter
+            - StripPrefix=1
+            - name: CircuitBreaker
+              args:
+                name: user-service-circuit-breaker
+                fallbackUri: forward:/fallback/user
+        
+        # Auth Server Route (Public)
         - id: auth-server
-          uri: http://localhost:9000
+          uri: http://auth-server:9000
           predicates:
             - Path=/auth/**
           filters:
-            - StripPrefix=0
-            - name: CircuitBreaker
-              args:
-                name: authCircuitBreaker
-                fallbackUri: forward:/fallback/auth
-        
-        # Resource Server routes
-        - id: resource-server
-          uri: http://localhost:8080
-          predicates:
-            - Path=/api/**
-          filters:
-            - StripPrefix=0
-            - name: CircuitBreaker
-              args:
-                name: resourceCircuitBreaker
-                fallbackUri: forward:/fallback/resource
-            - name: RateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 10
-                redis-rate-limiter.burstCapacity: 20
+            - StripPrefix=1
 ```
 
-### Route Configuration
+### JWT Validation Configuration
 
-The gateway routes requests based on URL patterns:
-
-| Route | Destination | Security | Features |
-|-------|-------------|----------|----------|
-| `/auth/**` | Auth Server (9000) | None | Circuit Breaker |
-| `/api/**` | Resource Server (8080) | JWT Required | Circuit Breaker, Rate Limiting |
-| `/public/**` | Resource Server (8080) | None | None |
-| `/actuator/**` | Gateway | None | Monitoring |
-
-## Security Implementation
-
-### 1. JWT Token Validation
-```java
-@Bean
-public ReactiveJwtDecoder jwtDecoder() {
-    NimbusReactiveJwtDecoder jwtDecoder = ReactiveJwtDecoders.fromIssuerLocation(issuerUri);
-    
-    OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer(issuerUri);
-    OAuth2TokenValidator<Jwt> withAudience = new DelegatingOAuth2TokenValidator<>(withIssuer);
-    
-    jwtDecoder.setJwtValidator(withAudience);
-    
-    return jwtDecoder;
-}
+```yaml
+# JWT Configuration
+jwt:
+  issuer-uri: http://localhost:9000
+  jwks-uri: http://localhost:9000/oauth2/jwks.json
+  audience: api-gateway
+  user-info-uri: http://localhost:9000/userinfo
 ```
 
-### 2. Route-Based Security
-```java
-.authorizeExchange(authz -> authz
-    .pathMatchers("/actuator/health").permitAll()
-    .pathMatchers("/public/**").permitAll()
-    .pathMatchers("/auth/**").permitAll()
-    .anyExchange().authenticated()
-)
+### Redis Configuration
+
+```yaml
+spring:
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
 ```
 
-### 3. Custom JWT Filter
+## 🔧 Key Components
+
+### JwtValidationFilter
+
+A custom filter that intercepts all requests and validates JWT tokens:
+
 ```java
 @Component
-public class JwtValidationFilter extends AbstractGatewayFilterFactory<Config> {
-    // Custom JWT validation logic
-    // Token blacklisting checks
-    // Request/response modification
+public class JwtValidationFilter implements GlobalFilter, Ordered {
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        // Extract JWT token from Authorization header
+        // Validate token using JwtValidationService
+        // Inject user information into headers
+        // Continue or reject request
+    }
 }
 ```
 
-### 4. CORS Configuration
+### JwtValidationService
+
+Service responsible for JWT token validation and user information extraction:
+
 ```java
-@Bean
-public CorsWebFilter corsWebFilter() {
-    CorsConfiguration corsConfig = new CorsConfiguration();
-    corsConfig.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000"));
-    corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    corsConfig.setAllowedHeaders(Arrays.asList("*"));
-    corsConfig.setAllowCredentials(true);
-    
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", corsConfig);
-    
-    return new CorsWebFilter(source);
+@Service
+public class JwtValidationService {
+    public Mono<JWTValidationResult> validateToken(String token) {
+        // 1. Validate JWT signature
+        // 2. Validate issuer
+        // 3. Validate audience
+        // 4. Validate expiration
+        // 5. Check blacklist
+        // 6. Extract authorities
+    }
 }
 ```
 
-## Circuit Breaker Configuration
+### Security Configuration
 
-### Resilience4j Settings
+Configures security settings for the gateway:
+
+```java
+@Configuration
+@EnableWebFluxSecurity
+public class SecurityConfig {
+    @Bean
+    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
+        // Configure security for WebFlux
+        // Set up CORS
+        // Configure authentication
+    }
+}
+```
+
+## 🌐 Request Flow
+
+### 1. Request Arrival
+
+```
+Client Request → API Gateway (Port 8080)
+```
+
+### 2. JWT Validation
+
+```
+JwtValidationFilter → Extract Token → Validate JWT → Check Blacklist
+```
+
+### 3. User Information Injection
+
+```
+Valid Token → Extract Claims → Inject Headers → Route to Service
+```
+
+### 4. Service Routing
+
+```
+Route Configuration → Load Balancer → Target Microservice
+```
+
+### 5. Response Processing
+
+```
+Service Response → Gateway → Client
+```
+
+## 🔐 Security Features
+
+### JWT Token Validation
+
+- **Signature Verification**: Validates JWT signature using JWK from auth server
+- **Issuer Validation**: Ensures token was issued by the correct auth server
+- **Audience Validation**: Verifies token is intended for api-gateway
+- **Expiration Check**: Validates token hasn't expired
+- **Blacklist Check**: Verifies token hasn't been revoked
+
+### User Information Injection
+
+The gateway injects user information into request headers:
+
+```
+X-User-ID: user123
+X-User-Roles: ROLE_USER,ROLE_ADMIN
+X-User-Username: johndoe
+X-User-Authorities: ROLE_USER,ROLE_ADMIN
+```
+
+### Circuit Breaker
+
+Provides fault tolerance for microservice failures:
+
 ```yaml
 resilience4j:
   circuitbreaker:
     instances:
-      authCircuitBreaker:
+      admin-service-circuit-breaker:
         sliding-window-size: 10
-        minimum-number-of-calls: 5
         failure-rate-threshold: 50
         wait-duration-in-open-state: 30s
-      resourceCircuitBreaker:
+      user-service-circuit-breaker:
         sliding-window-size: 10
-        minimum-number-of-calls: 5
         failure-rate-threshold: 50
         wait-duration-in-open-state: 30s
 ```
 
-### Fallback Endpoints
-- `/fallback/auth` - Auth service unavailable
-- `/fallback/resource` - Resource service unavailable
-- `/fallback/general` - General service unavailable
+## 🚀 Running the Application
 
-## Rate Limiting
+### Prerequisites
 
-### Redis Rate Limiter
-```yaml
-- name: RateLimiter
-  args:
-    redis-rate-limiter.replenishRate: 10    # Requests per second
-    redis-rate-limiter.burstCapacity: 20    # Burst capacity
+- Java 17 or higher
+- Maven 3.6+
+- Redis server running
+- Auth server running
+
+### Local Development
+
+1. **Start Redis**:
+   ```bash
+   redis-server
+   ```
+
+2. **Start Auth Server**:
+   ```bash
+   cd auth-server && mvn spring-boot:run
+   ```
+
+3. **Build the gateway**:
+   ```bash
+   mvn clean install
+   ```
+
+4. **Run the gateway**:
+   ```bash
+   mvn spring-boot:run
+   ```
+
+5. **Access the gateway**:
+   - API Gateway: http://localhost:8080
+   - Health Check: http://localhost:8080/actuator/health
+
+### Docker Deployment
+
+1. **Build the Docker image**:
+   ```bash
+   docker build -t oauth-api-gateway .
+   ```
+
+2. **Run with Docker Compose**:
+   ```bash
+   docker-compose up api-gateway
+   ```
+
+## 📊 Monitoring and Logging
+
+### Log Levels
+
+- **DEBUG**: Detailed JWT validation and routing
+- **INFO**: Request routing and service calls
+- **WARN**: Circuit breaker activations and timeouts
+- **ERROR**: JWT validation failures and service errors
+
+### Key Log Messages
+
+```
+INFO  - JWT validation successful for user: user123
+INFO  - Routing request to admin-service: /api/admin/dashboard
+INFO  - Circuit breaker activated for user-service
+ERROR - JWT validation failed: Invalid signature
 ```
 
-### Rate Limiting Rules
-- **Replenish Rate**: 10 requests per second
-- **Burst Capacity**: 20 requests maximum burst
-- **Applied To**: All `/api/**` routes
-- **Storage**: Redis for distributed rate limiting
+### Health Checks
 
-## Testing the API Gateway
+The gateway provides health check endpoints:
 
-### 1. Test Public Endpoints
-```bash
-# Test public endpoint (no authentication required)
-curl http://localhost:8000/public/info
+- `/actuator/health` - Overall health status
+- `/actuator/health/gateway` - Gateway-specific health
+- `/actuator/health/redis` - Redis connection health
 
-# Test health check
-curl http://localhost:8000/actuator/health
-```
+## 🔧 Customization
 
-### 2. Test Protected Endpoints
-```bash
-# Test protected endpoint (requires JWT)
-curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  http://localhost:8000/api/user/profile
+### Adding New Routes
 
-# Test admin endpoint
-curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  http://localhost:8000/api/admin/dashboard
-```
+1. Add route configuration in `application.yml`
+2. Configure predicates and filters
+3. Set up circuit breaker if needed
+4. Update security configuration
 
-### 3. Test Auth Server Routing
-```bash
-# Test OIDC discovery (routed to auth server)
-curl http://localhost:8000/auth/.well-known/openid_configuration
+### Custom Filters
 
-# Test JWKS endpoint
-curl http://localhost:8000/auth/oauth2/jwks.json
-```
+1. Implement `GlobalFilter` interface
+2. Add filter logic in `filter()` method
+3. Configure filter order
+4. Register as Spring bean
 
-### 4. Test Rate Limiting
-```bash
-# Make multiple rapid requests to test rate limiting
-for i in {1..25}; do
-  curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-    http://localhost:8000/api/user/profile
-  echo "Request $i"
-done
-```
+### JWT Claims Customization
 
-### 5. Test Circuit Breaker
-```bash
-# Stop the resource server and test circuit breaker
-curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  http://localhost:8000/api/user/profile
-# Should return fallback response
-```
+1. Modify `JwtValidationService` to extract new claims
+2. Update header injection in `JwtValidationFilter`
+3. Configure microservices to handle new headers
 
-## Monitoring and Health Checks
-
-### Actuator Endpoints
-- `GET /actuator/health` - Application health
-- `GET /actuator/info` - Application information
-- `GET /actuator/metrics` - Application metrics
-- `GET /actuator/gateway` - Gateway routes and filters
-
-### Circuit Breaker Metrics
-```bash
-# Check circuit breaker status
-curl http://localhost:8000/actuator/health
-
-# View circuit breaker metrics
-curl http://localhost:8000/actuator/metrics/resilience4j.circuitbreaker.calls
-```
-
-### Rate Limiter Metrics
-```bash
-# Check rate limiter metrics
-curl http://localhost:8000/actuator/metrics/spring.cloud.gateway.requests
-```
-
-## Request Flow
-
-### 1. Public Request Flow
-```
-Client → Gateway (8000) → Resource Server (8080) → Response
-```
-
-### 2. Protected Request Flow
-```
-Client → Gateway (8000) → JWT Validation → Resource Server (8080) → Response
-```
-
-### 3. Auth Request Flow
-```
-Client → Gateway (8000) → Auth Server (9000) → Response
-```
-
-### 4. Circuit Breaker Flow
-```
-Client → Gateway (8000) → Circuit Breaker → Service (if available) → Response
-Client → Gateway (8000) → Circuit Breaker → Fallback (if service down) → Response
-```
-
-## Security Best Practices Implemented
-
-1. **JWT Validation** - Complete token validation at gateway level
-2. **Route-Based Security** - Different security rules for different routes
-3. **Token Blacklisting** - Redis-based token revocation checking
-4. **Rate Limiting** - Protection against API abuse
-5. **Circuit Breaker** - Graceful degradation when services are down
-6. **CORS Configuration** - Proper cross-origin handling
-7. **Request Filtering** - Custom security filters
-8. **Monitoring** - Comprehensive health checks and metrics
-
-## Troubleshooting
+## 🐛 Troubleshooting
 
 ### Common Issues
 
-1. **Service Unavailable**
-   - Check if Auth Server is running on port 9000
-   - Check if Resource Server is running on port 8080
-   - Verify Redis is running on port 6379
+1. **JWT Validation Failures**: Check auth server JWK endpoint
+2. **Service Routing Issues**: Verify service discovery and health
+3. **Redis Connection**: Ensure Redis is accessible
+4. **CORS Errors**: Check CORS configuration
 
-2. **JWT Validation Failed**
-   - Ensure Auth Server is accessible
-   - Check JWKS endpoint is working
-   - Verify token hasn't expired
+### Debug Mode
 
-3. **Rate Limiting Issues**
-   - Check Redis connection
-   - Verify rate limiter configuration
-   - Monitor rate limiter metrics
-
-4. **Circuit Breaker Issues**
-   - Check circuit breaker configuration
-   - Monitor circuit breaker metrics
-   - Verify fallback endpoints are working
-
-### Logs
 Enable debug logging in `application.yml`:
+
 ```yaml
 logging:
   level:
+    com.api.apigateway: DEBUG
     org.springframework.cloud.gateway: DEBUG
     org.springframework.security: DEBUG
-    org.springframework.security.oauth2: DEBUG
 ```
 
-## Integration with Frontend
+### Circuit Breaker Monitoring
 
-### React Integration Example
-```javascript
-// API call through gateway
-const response = await fetch('http://localhost:8000/api/user/profile', {
-  headers: {
-    'Authorization': `Bearer ${accessToken}`,
-    'Content-Type': 'application/json'
-  }
-});
+Monitor circuit breaker status:
 
-// Handle rate limiting
-if (response.status === 429) {
-  console.log('Rate limit exceeded');
-}
+```bash
+# Check circuit breaker metrics
+curl http://localhost:8080/actuator/metrics/resilience4j.circuitbreaker.calls
 
-// Handle circuit breaker
-if (response.status === 503) {
-  console.log('Service temporarily unavailable');
-}
+# Check circuit breaker state
+curl http://localhost:8080/actuator/health
 ```
 
-## Performance Considerations
+## 📚 API Documentation
 
-### Optimization Tips
-1. **Connection Pooling** - Configure Redis connection pools
-2. **Caching** - Implement response caching for static resources
-3. **Compression** - Enable response compression
-4. **Load Balancing** - Use multiple service instances
-5. **Monitoring** - Set up alerts for performance metrics
+### Gateway Endpoints
 
-### Scaling
-- **Horizontal Scaling** - Deploy multiple gateway instances
-- **Load Balancer** - Use external load balancer (nginx, haproxy)
-- **Service Discovery** - Integrate with service discovery (Eureka, Consul)
-- **Distributed Rate Limiting** - Use Redis for shared rate limiting
+- **Health Check**: `GET /actuator/health`
+- **Metrics**: `GET /actuator/metrics`
+- **Fallback**: `GET /fallback/{service}`
 
-## Next Steps
+### Routing Examples
 
-1. **Frontend Integration** - React OIDC client implementation
-2. **Service Discovery** - Add service discovery and load balancing
-3. **Production Deployment** - Security hardening and monitoring
-4. **Distributed Tracing** - Add tracing with Sleuth/Zipkin
-5. **API Documentation** - Add OpenAPI/Swagger documentation
+```
+# Admin Service
+GET /api/admin/dashboard → admin-service:8081/admin/dashboard
 
-## Contributing
+# User Service
+GET /api/user/profile → user-service:8082/user/profile
 
-This is a demo application for educational purposes. For production use, consider:
+# Auth Server (Public)
+GET /auth/oauth2/jwks.json → auth-server:9000/oauth2/jwks.json
+```
 
-- Using a production load balancer (nginx, haproxy)
-- Implementing comprehensive monitoring and alerting
-- Adding distributed tracing and logging
-- Setting up proper SSL certificates
-- Implementing backup and recovery procedures
-- Adding API versioning and documentation 
+### Request Headers
+
+The gateway adds the following headers to requests:
+
+```
+Authorization: Bearer <jwt_token>
+X-User-ID: <user_id>
+X-User-Roles: <comma_separated_roles>
+X-User-Username: <username>
+X-User-Authorities: <comma_separated_authorities>
+```
+
+## 🤝 Integration
+
+### Frontend Integration
+
+The gateway integrates with the React frontend by:
+- Providing a single entry point for all API calls
+- Handling CORS for cross-origin requests
+- Validating JWT tokens automatically
+- Injecting user information for microservices
+
+### Microservice Integration
+
+Microservices integrate through:
+- JWT token validation at the gateway level
+- User information injection via headers
+- Circuit breaker for fault tolerance
+- Load balancing for scalability
+
+### Auth Server Integration
+
+The auth server integration includes:
+- JWT token validation using JWK
+- Token blacklist checking via Redis
+- User information retrieval from /userinfo endpoint
+- OIDC compliance for token standards
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details. 

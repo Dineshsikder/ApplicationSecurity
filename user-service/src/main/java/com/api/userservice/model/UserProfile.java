@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 public class UserProfile {
+    private String sub;
     private Long userId;
     private String username;
     private String email;
@@ -18,6 +19,7 @@ public class UserProfile {
     private Map<String, Object> preferences;
 
     public UserProfile() {
+        this.sub = "demo_user";
         this.userId = 1L;
         this.username = "demo_user";
         this.email = "user@example.com";
@@ -37,6 +39,9 @@ public class UserProfile {
     }
 
     // Getters and Setters
+    public String getSub() { return sub; }
+    public void setSub(String sub) { this.sub = sub; }
+    
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
     

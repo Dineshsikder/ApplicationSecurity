@@ -162,4 +162,12 @@ public class AuthController {
             return ResponseEntity.badRequest().body(response);
         }
     }
+
+    @RestController
+    public class WellKnownController {
+        @GetMapping("/.well-known/appspecific/com.chrome.devtools.json")
+        public ResponseEntity<Void> handleChromeDevTools() {
+            return ResponseEntity.noContent().build();
+        }
+    }
 } 
