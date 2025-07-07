@@ -1,53 +1,56 @@
+/* Enterprise Footer Design */
+
 .footer {
-  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-  color: white;
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-primary);
   margin-top: auto;
-  width: 100%;
 }
 
 .footer-content {
-  width: 100%;
+  max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: var(--space-8) var(--space-4);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 40px;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: var(--space-8);
 }
 
 .footer-section h3 {
-  color: #ecf0f1;
-  margin: 0 0 15px 0;
-  font-size: 1.4rem;
-  font-weight: 600;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-3);
 }
 
 .footer-section h4 {
-  color: #ecf0f1;
-  margin: 0 0 15px 0;
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-3);
 }
 
 .footer-section p {
-  color: #bdc3c7;
-  line-height: 1.6;
-  margin: 0 0 20px 0;
+  color: var(--text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--space-4);
 }
 
 .social-links {
   display: flex;
-  gap: 15px;
+  gap: var(--space-3);
 }
 
 .social-link {
-  color: #3498db;
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s ease;
+  transition: color var(--transition-normal);
 }
 
 .social-link:hover {
-  color: #2980b9;
+  color: var(--color-primary-dark);
+  text-decoration: none;
 }
 
 .footer-links {
@@ -57,71 +60,97 @@
 }
 
 .footer-links li {
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
 }
 
 .footer-links a {
-  color: #bdc3c7;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color var(--transition-normal);
 }
 
 .footer-links a:hover {
-  color: #3498db;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.footer-links li:not(:has(a)) {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
 }
 
 .footer-bottom {
-  background: rgba(0, 0, 0, 0.2);
-  padding: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  width: 100%;
+  border-top: 1px solid var(--border-primary);
+  background-color: var(--bg-tertiary);
 }
 
 .footer-bottom-content {
-  width: 100%;
+  max-width: var(--container-max-width);
   margin: 0 auto;
+  padding: var(--space-4) var(--space-4);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 20px;
-  padding: 0 20px;
+  gap: var(--space-4);
 }
 
 .footer-bottom p {
-  color: #bdc3c7;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
   margin: 0;
 }
 
 .footer-bottom-links {
   display: flex;
-  gap: 20px;
+  gap: var(--space-4);
 }
 
 .footer-bottom-links a {
-  color: #bdc3c7;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
   text-decoration: none;
-  font-size: 0.9rem;
-  transition: color 0.2s ease;
+  transition: color var(--transition-normal);
 }
 
 .footer-bottom-links a:hover {
-  color: #3498db;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .footer-content {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+  }
 }
 
 @media (max-width: 768px) {
   .footer-content {
     grid-template-columns: 1fr;
-    gap: 30px;
-    padding: 30px 20px;
+    gap: var(--space-6);
+    padding: var(--space-6) var(--space-3);
   }
   
   .footer-bottom-content {
     flex-direction: column;
     text-align: center;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-3);
   }
   
   .footer-bottom-links {
     justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-content {
+    padding: var(--space-4) var(--space-3);
+  }
+  
+  .social-links {
+    flex-wrap: wrap;
   }
 } 

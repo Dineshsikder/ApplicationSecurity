@@ -239,7 +239,7 @@ export const authAPI = {
 };
 
 // Export the main apiClient for custom requests
-export default apiClient;
+export default apiClient; 
 
 // Utility function to manually add authorization headers
 export const addAuthHeaders = (headers = {}) => {

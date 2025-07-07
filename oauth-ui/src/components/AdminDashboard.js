@@ -1169,6 +1169,493 @@ public RegisteredClient registeredClient() {
                   </div>
                 </div>
               </div>
+
+              {/* Required Dependencies Section */}
+              <div className="workflow-phase">
+                <h3>📦 Required Dependencies & Libraries</h3>
+                <p className="workflow-description">
+                  This section lists all the essential dependencies and libraries used to implement OAuth2/OIDC security in our application.
+                </p>
+
+                <div className="dependencies-grid">
+                  <div className="dependency-category">
+                    <h4>🔐 Authorization Server Dependencies</h4>
+                    <div className="code-block">
+                      <div className="code-header">
+                        <span>File: auth-server/pom.xml</span>
+                      </div>
+                      <pre><code>{`<!-- Spring Authorization Server -->
+<dependency>
+    <groupId>org.springframework.security</groupId>
+    <artifactId>spring-security-oauth2-authorization-server</artifactId>
+    <version>1.2.1</version>
+</dependency>
+
+<!-- Spring Security -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+
+<!-- Spring Web -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+
+<!-- Spring Data JPA -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+
+<!-- Redis for token blacklisting -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+
+<!-- Nimbus JOSE+JWT for JWT handling -->
+<dependency>
+    <groupId>com.nimbusds</groupId>
+    <artifactId>nimbus-jose-jwt</artifactId>
+    <version>9.31</version>
+</dependency>
+
+<!-- H2 Database (for development) -->
+<dependency>
+    <groupId>com.h2database</groupId>
+    <artifactId>h2</artifactId>
+    <scope>runtime</scope>
+</dependency>`}</code></pre>
+                    </div>
+                  </div>
+
+                  <div className="dependency-category">
+                    <h4>🚪 API Gateway Dependencies</h4>
+                    <div className="code-block">
+                      <div className="code-header">
+                        <span>File: api-gateway/pom.xml</span>
+                      </div>
+                      <pre><code>{`<!-- Spring Cloud Gateway -->
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-gateway</artifactId>
+</dependency>
+
+<!-- Spring Security -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+
+<!-- Spring WebFlux -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-webflux</artifactId>
+</dependency>
+
+<!-- Nimbus JOSE+JWT for JWT validation -->
+<dependency>
+    <groupId>com.nimbusds</groupId>
+    <artifactId>nimbus-jose-jwt</artifactId>
+    <version>9.31</version>
+</dependency>
+
+<!-- Spring Cloud Circuit Breaker -->
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
+</dependency>
+
+<!-- Redis for caching -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+</dependency>`}</code></pre>
+                    </div>
+                  </div>
+
+                  <div className="dependency-category">
+                    <h4>🔧 Microservices Dependencies</h4>
+                    <div className="code-block">
+                      <div className="code-header">
+                        <span>File: admin-service/pom.xml & user-service/pom.xml</span>
+                      </div>
+                      <pre><code>{`<!-- Spring Security -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+
+<!-- Spring Web -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+
+<!-- Spring Data JPA -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+
+<!-- Spring Security OAuth2 Resource Server -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+</dependency>
+
+<!-- Spring Security Method Security -->
+<dependency>
+    <groupId>org.springframework.security</groupId>
+    <artifactId>spring-security-config</artifactId>
+</dependency>
+
+<!-- H2 Database (for development) -->
+<dependency>
+    <groupId>com.h2database</groupId>
+    <artifactId>h2</artifactId>
+    <scope>runtime</scope>
+</dependency>`}</code></pre>
+                    </div>
+                  </div>
+
+                  <div className="dependency-category">
+                    <h4>📱 Frontend Dependencies</h4>
+                    <div className="code-block">
+                      <div className="code-header">
+                        <span>File: oauth-ui/package.json</span>
+                      </div>
+                      <pre><code>{`{
+  "dependencies": {
+    // OIDC Client Library
+    "oidc-client-ts": "^2.1.3",
+    
+    // React and core libraries
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.8.0",
+    
+    // HTTP client
+    "axios": "^1.3.0",
+    
+    // UI components
+    "react-scripts": "5.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.0",
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11"
+  }
+}`}</code></pre>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="dependency-notes">
+                  <h4>🔍 Key Dependency Explanations</h4>
+                  <div className="notes-grid">
+                    <div className="note-item">
+                      <h5>spring-security-oauth2-authorization-server</h5>
+                      <p>Provides OAuth2 authorization server capabilities including authorization endpoints, token endpoints, and OpenID Connect support.</p>
+                    </div>
+                    <div className="note-item">
+                      <h5>nimbus-jose-jwt</h5>
+                      <p>Comprehensive JWT library for creating, parsing, and validating JSON Web Tokens with various algorithms (RS256, HS256, etc.).</p>
+                    </div>
+                    <div className="note-item">
+                      <h5>oidc-client-ts</h5>
+                      <p>TypeScript/JavaScript library for OpenID Connect client functionality including token management, silent renewal, and session handling.</p>
+                    </div>
+                    <div className="note-item">
+                      <h5>spring-cloud-starter-gateway</h5>
+                      <p>Provides API gateway functionality with routing, filtering, and security capabilities for microservices architecture.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Spring Security Explanation */}
+              <div className="workflow-phase">
+                <h3>🛡️ How Spring Security Works in OAuth2/OIDC</h3>
+                <p className="workflow-description">
+                  This section explains how Spring Security integrates with OAuth2/OIDC to provide comprehensive security for our application.
+                </p>
+
+                <div className="spring-security-grid">
+                  <div className="security-concept">
+                    <h4>🔐 Spring Security Architecture</h4>
+                    <div className="concept-explanation">
+                      <h5>Core Components:</h5>
+                      <ul>
+                        <li><strong>SecurityFilterChain:</strong> Defines the security rules and filters for HTTP requests</li>
+                        <li><strong>AuthenticationManager:</strong> Manages authentication process and validates credentials</li>
+                        <li><strong>UserDetailsService:</strong> Loads user-specific data for authentication</li>
+                        <li><strong>AccessDecisionManager:</strong> Makes authorization decisions based on user roles and permissions</li>
+                        <li><strong>SecurityContextHolder:</strong> Stores authentication information in thread-local storage</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="security-concept">
+                    <h4>🔄 Request Processing Flow</h4>
+                    <div className="flow-diagram">
+                      <div className="flow-step">
+                        <span className="step-number">1</span>
+                        <span className="step-text">HTTP Request arrives</span>
+                      </div>
+                      <div className="flow-arrow">↓</div>
+                      <div className="flow-step">
+                        <span className="step-number">2</span>
+                        <span className="step-text">SecurityFilterChain processes request</span>
+                      </div>
+                      <div className="flow-arrow">↓</div>
+                      <div className="flow-step">
+                        <span className="step-number">3</span>
+                        <span className="step-text">Authentication filter extracts credentials</span>
+                      </div>
+                      <div className="flow-arrow">↓</div>
+                      <div className="flow-step">
+                        <span className="step-number">4</span>
+                        <span className="step-text">AuthenticationManager validates credentials</span>
+                      </div>
+                      <div className="flow-arrow">↓</div>
+                      <div className="flow-step">
+                        <span className="step-number">5</span>
+                        <span className="step-text">SecurityContextHolder stores authentication</span>
+                      </div>
+                      <div className="flow-arrow">↓</div>
+                      <div className="flow-step">
+                        <span className="step-number">6</span>
+                        <span className="step-text">AccessDecisionManager checks authorization</span>
+                      </div>
+                      <div className="flow-arrow">↓</div>
+                      <div className="flow-step">
+                        <span className="step-number">7</span>
+                        <span className="step-text">Request proceeds to controller or denied</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="security-concept">
+                    <h4>🎫 JWT Integration with Spring Security</h4>
+                    <div className="code-block">
+                      <div className="code-header">
+                        <span>JWT Authentication Configuration</span>
+                      </div>
+                      <pre><code>{`@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
+public class SecurityConfig {
+  
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+      .oauth2ResourceServer(oauth2 -> oauth2
+        .jwt(jwt -> jwt
+          .jwtAuthenticationConverter(jwtAuthenticationConverter())
+          .decoder(jwtDecoder())
+        )
+      )
+      .authorizeHttpRequests(authz -> authz
+        .requestMatchers("/public/**").permitAll()
+        .requestMatchers("/admin/**").hasRole("ADMIN")
+        .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+        .anyRequest().authenticated()
+      )
+      .sessionManagement(session -> session
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+      );
+    
+    return http.build();
+  }
+  
+  @Bean
+  public JwtAuthenticationConverter jwtAuthenticationConverter() {
+    JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+    grantedAuthoritiesConverter.setAuthoritiesClaimName("roles");
+    grantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
+    
+    JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+    converter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
+    return converter;
+  }
+}`}</code></pre>
+                    </div>
+                  </div>
+
+                  <div className="security-concept">
+                    <h4>🔑 Method-Level Security</h4>
+                    <div className="code-block">
+                      <div className="code-header">
+                        <span>@PreAuthorize Annotations</span>
+                      </div>
+                      <pre><code>{`@RestController
+@RequestMapping("/admin")
+public class AdminController {
+  
+  // Role-based access control
+  @GetMapping("/dashboard")
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  public ResponseEntity<Map<String, Object>> getAdminDashboard() {
+    // Only users with ROLE_ADMIN can access
+    return ResponseEntity.ok(adminService.getDashboard());
+  }
+  
+  // Expression-based access control
+  @PostMapping("/users/{userId}")
+  @PreAuthorize("hasRole('ROLE_ADMIN') and #userId != authentication.principal.subject")
+  public ResponseEntity<?> updateUser(@PathVariable String userId) {
+    // Admin can update any user except themselves
+    return ResponseEntity.ok(userService.updateUser(userId));
+  }
+  
+  // Custom permission evaluation
+  @GetMapping("/reports")
+  @PreAuthorize("hasPermission('REPORT', 'READ')")
+  public ResponseEntity<?> getReports() {
+    // Custom permission check
+    return ResponseEntity.ok(reportService.getReports());
+  }
+}`}</code></pre>
+                    </div>
+                  </div>
+
+                  <div className="security-concept">
+                    <h4>🔄 OAuth2 Authorization Server Integration</h4>
+                    <div className="code-block">
+                      <div className="code-header">
+                        <span>Authorization Server Configuration</span>
+                      </div>
+                      <pre><code>{`@Configuration
+@EnableWebSecurity
+public class AuthorizationServerConfig {
+  
+  @Bean
+  @Order(Ordered.HIGHEST_PRECEDENCE)
+  public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) {
+    // Apply OAuth2 authorization server defaults
+    OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+    
+    // Configure OIDC support
+    http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+        .oidc(Customizer.withDefaults());
+    
+    // Configure JWT token customization
+    http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+        .tokenEndpoint(tokenEndpoint -> tokenEndpoint
+            .accessTokenRequestConverter(accessTokenRequestConverter())
+            .accessTokenResponseHandler(accessTokenResponseHandler())
+        );
+    
+    return http.build();
+  }
+  
+  @Bean
+  public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer() {
+    return context -> {
+      if (context.getTokenType().getValue().equals("access_token")) {
+        context.getClaims().claims(claims -> {
+          // Add custom claims to JWT
+          claims.put("roles", extractRoles(context.getPrincipal()));
+          claims.put("aud", List.of("api-gateway"));
+        });
+      }
+    };
+  }
+}`}</code></pre>
+                    </div>
+                  </div>
+
+                  <div className="security-concept">
+                    <h4>🛡️ Security Best Practices Implementation</h4>
+                    <div className="best-practices-grid">
+                      <div className="practice-item">
+                        <h5>🔒 Stateless Authentication</h5>
+                        <ul>
+                          <li>JWT tokens stored in client</li>
+                          <li>No server-side session storage</li>
+                          <li>Scalable across multiple instances</li>
+                          <li>SessionCreationPolicy.STATELESS</li>
+                        </ul>
+                      </div>
+                      
+                      <div className="practice-item">
+                        <h5>🎯 Principle of Least Privilege</h5>
+                        <ul>
+                          <li>@PreAuthorize with specific roles</li>
+                          <li>Method-level security checks</li>
+                          <li>Resource-based access control</li>
+                          <li>Custom permission evaluators</li>
+                        </ul>
+                      </div>
+                      
+                      <div className="practice-item">
+                        <h5>🔄 Token Security</h5>
+                        <ul>
+                          <li>Short-lived access tokens (15 min)</li>
+                          <li>Automatic token refresh</li>
+                          <li>Token blacklisting for revocation</li>
+                          <li>JTI for unique token identification</li>
+                        </ul>
+                      </div>
+                      
+                      <div className="practice-item">
+                        <h5>🔐 Secure Headers</h5>
+                        <ul>
+                          <li>Content Security Policy (CSP)</li>
+                          <li>X-Frame-Options for clickjacking protection</li>
+                          <li>X-Content-Type-Options</li>
+                          <li>Strict-Transport-Security (HSTS)</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="security-concept">
+                    <h4>🚨 Error Handling & Security Responses</h4>
+                    <div className="code-block">
+                      <div className="code-header">
+                        <span>Custom Security Exception Handling</span>
+                      </div>
+                      <pre><code>{`@ControllerAdvice
+public class SecurityExceptionHandler {
+  
+  @ExceptionHandler(AccessDeniedException.class)
+  public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
+    ErrorResponse error = new ErrorResponse(
+      "ACCESS_DENIED",
+      "Insufficient privileges to access this resource",
+      HttpStatus.FORBIDDEN.value()
+    );
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+  }
+  
+  @ExceptionHandler(JwtException.class)
+  public ResponseEntity<ErrorResponse> handleJwtException(JwtException ex) {
+    ErrorResponse error = new ErrorResponse(
+      "INVALID_TOKEN",
+      "The provided token is invalid or expired",
+      HttpStatus.UNAUTHORIZED.value()
+    );
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+  }
+  
+  @ExceptionHandler(AuthenticationException.class)
+  public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex) {
+    ErrorResponse error = new ErrorResponse(
+      "AUTHENTICATION_FAILED",
+      "Authentication failed. Please login again.",
+      HttpStatus.UNAUTHORIZED.value()
+    );
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+  }
+}`}</code></pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}

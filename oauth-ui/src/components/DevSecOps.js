@@ -1,918 +1,284 @@
-import React, { useState } from 'react';
-import './DevSecOps.css';
+import React from 'react';
 
 const DevSecOps = () => {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [selectedArchitecture, setSelectedArchitecture] = useState('production');
-
-  const tabs = [
-    { id: 'overview', label: 'Overview', icon: '🏗️' },
-    { id: 'architecture', label: 'Architecture', icon: '🏛️' },
-    { id: 'security', label: 'Security', icon: '🔒' },
-    { id: 'monitoring', label: 'Monitoring', icon: '📊' },
-    { id: 'disaster', label: 'Disaster Recovery', icon: '🚨' },
-    { id: 'performance', label: 'Performance & TPS', icon: '⚡' },
-    { id: 'automation', label: 'Automation', icon: '🤖' },
-    { id: 'compliance', label: 'Compliance', icon: '📋' }
-  ];
-
-  const architectures = {
-    development: {
-      name: 'Development Environment',
-      description: 'Local development setup with minimal security for rapid iteration',
-      components: [
-        'Local Docker containers',
-        'In-memory databases',
-        'Self-signed certificates',
-        'Basic authentication',
-        'Local Redis instance',
-        'Development OAuth server'
-      ],
-      security: 'Basic security for development only',
-      scaling: 'Single instance, no scaling'
-    },
-    staging: {
-      name: 'Staging Environment',
-      description: 'Pre-production environment with production-like security',
-      components: [
-        'Container orchestration (Docker Swarm)',
-        'Managed databases',
-        'Valid SSL certificates',
-        'Full OAuth2/OIDC implementation',
-        'Redis cluster',
-        'Load balancer',
-        'Monitoring stack'
-      ],
-      security: 'Production-like security policies',
-      scaling: 'Auto-scaling based on load'
-    },
-    production: {
-      name: 'Production Environment',
-      description: 'High-availability production environment with enterprise security',
-      components: [
-        'Kubernetes orchestration',
-        'Multi-region deployment',
-        'Enterprise databases (RDS/Azure SQL)',
-        'WAF and DDoS protection',
-        'Advanced OAuth2/OIDC with PKCE',
-        'Redis Enterprise cluster',
-        'Global load balancer',
-        'Comprehensive monitoring',
-        'Security scanning',
-        'Backup and disaster recovery'
-      ],
-      security: 'Enterprise-grade security with compliance',
-      scaling: 'Global auto-scaling with 99.9% uptime'
-    }
-  };
-
-  const securityPractices = {
-    private: [
-      {
-        category: 'Infrastructure Security',
-        practices: [
-          {
-            name: 'Network Segmentation',
-            description: 'Isolate different tiers of the application',
-            implementation: 'VPC, subnets, security groups, network ACLs',
-            tools: ['AWS VPC', 'Azure VNet', 'GCP VPC', 'Cisco ACI']
-          },
-          {
-            name: 'Secrets Management',
-            description: 'Secure storage and rotation of sensitive data',
-            implementation: 'Centralized secrets management with automatic rotation',
-            tools: ['HashiCorp Vault', 'AWS Secrets Manager', 'Azure Key Vault', 'CyberArk']
-          },
-          {
-            name: 'Container Security',
-            description: 'Secure container images and runtime',
-            implementation: 'Image scanning, runtime protection, least privilege',
-            tools: ['Aqua Security', 'Twistlock', 'Snyk', 'Falco']
-          },
-          {
-            name: 'Infrastructure as Code Security',
-            description: 'Secure infrastructure provisioning',
-            implementation: 'Static analysis, policy enforcement, drift detection',
-            tools: ['Checkov', 'Terraform Sentinel', 'AWS Config', 'Azure Policy']
-          }
-        ]
-      },
-      {
-        category: 'Application Security',
-        practices: [
-          {
-            name: 'Static Application Security Testing (SAST)',
-            description: 'Analyze source code for security vulnerabilities',
-            implementation: 'Automated scanning in CI/CD pipeline',
-            tools: ['SonarQube', 'Snyk', 'Checkmarx', 'Veracode']
-          },
-          {
-            name: 'Dynamic Application Security Testing (DAST)',
-            description: 'Test running applications for security issues',
-            implementation: 'Automated security testing in staging/production',
-            tools: ['OWASP ZAP', 'Burp Suite', 'Acunetix', 'AppScan']
-          },
-          {
-            name: 'Interactive Application Security Testing (IAST)',
-            description: 'Real-time security testing during application execution',
-            implementation: 'Runtime security monitoring and testing',
-            tools: ['Contrast Security', 'Hdiv', 'Seeker', 'CxSAST']
-          },
-          {
-            name: 'Software Composition Analysis (SCA)',
-            description: 'Identify vulnerabilities in third-party dependencies',
-            implementation: 'Automated dependency scanning and updates',
-            tools: ['Snyk', 'OWASP Dependency Check', 'WhiteSource', 'FOSSA']
-          }
-        ]
-      },
-      {
-        category: 'Runtime Security',
-        practices: [
-          {
-            name: 'Runtime Application Self-Protection (RASP)',
-            description: 'Real-time application protection and monitoring',
-            implementation: 'Embedded security controls in application runtime',
-            tools: ['Contrast Security', 'Hdiv', 'Immunio', 'Prevoty']
-          },
-          {
-            name: 'Web Application Firewall (WAF)',
-            description: 'Protect against web application attacks',
-            implementation: 'Layer 7 traffic filtering and attack prevention',
-            tools: ['AWS WAF', 'Azure Application Gateway', 'Cloudflare', 'Imperva']
-          },
-          {
-            name: 'API Security',
-            description: 'Protect API endpoints and data',
-            implementation: 'Rate limiting, authentication, input validation',
-            tools: ['Kong', 'Tyk', 'AWS API Gateway', 'Azure API Management']
-          }
-        ]
-      }
-    ],
-    public: [
-      {
-        category: 'Public Security Measures',
-        practices: [
-          {
-            name: 'HTTPS Enforcement',
-            description: 'Force all traffic over encrypted connections',
-            implementation: 'HSTS headers, SSL/TLS configuration, certificate management',
-            tools: ['Let\'s Encrypt', 'AWS Certificate Manager', 'Cloudflare SSL']
-          },
-          {
-            name: 'Content Security Policy (CSP)',
-            description: 'Prevent XSS attacks and control resource loading',
-            implementation: 'CSP headers with strict policies',
-            tools: ['CSP Builder', 'CSP Evaluator', 'Report-URI']
-          },
-          {
-            name: 'Security Headers',
-            description: 'Implement security headers for protection',
-            implementation: 'X-Frame-Options, X-Content-Type-Options, etc.',
-            tools: ['Security Headers', 'Mozilla Observatory', 'OWASP Security Headers']
-          },
-          {
-            name: 'Rate Limiting',
-            description: 'Prevent abuse and DDoS attacks',
-            implementation: 'Request rate limiting per IP/user',
-            tools: ['Redis Rate Limiting', 'Cloudflare Rate Limiting', 'AWS WAF']
-          }
-        ]
-      }
-    ]
-  };
-
-  const disasterRecovery = {
-    strategies: [
-      {
-        name: 'Backup Strategy',
-        description: 'Comprehensive data backup and recovery',
-        components: [
-          'Automated daily backups',
-          'Point-in-time recovery',
-          'Cross-region backup replication',
-          'Backup encryption at rest',
-          'Regular backup testing',
-          'Backup monitoring and alerting'
-        ],
-        rto: '4 hours',
-        rpo: '1 hour'
-      },
-      {
-        name: 'High Availability',
-        description: 'Multi-region deployment for continuous availability',
-        components: [
-          'Active-active deployment',
-          'Global load balancing',
-          'Database replication',
-          'Auto-failover mechanisms',
-          'Health check monitoring',
-          'Traffic routing optimization'
-        ],
-        rto: '5 minutes',
-        rpo: 'Near real-time'
-      },
-      {
-        name: 'Disaster Recovery Sites',
-        description: 'Geographically distributed recovery sites',
-        components: [
-          'Primary site (US East)',
-          'Secondary site (US West)',
-          'Tertiary site (Europe)',
-          'Warm standby environments',
-          'Automated failover testing',
-          'Recovery documentation'
-        ],
-        rto: '30 minutes',
-        rpo: '15 minutes'
-      }
-    ],
-    procedures: [
-      {
-        phase: 'Detection',
-        actions: [
-          'Automated monitoring alerts',
-          'Manual incident reporting',
-          'Impact assessment',
-          'Stakeholder notification'
-        ]
-      },
-      {
-        phase: 'Response',
-        actions: [
-          'Incident response team activation',
-          'Communication plan execution',
-          'Initial containment measures',
-          'Customer notification'
-        ]
-      },
-      {
-        phase: 'Recovery',
-        actions: [
-          'Failover to secondary site',
-          'Data restoration from backups',
-          'Service validation',
-          'Performance monitoring'
-        ]
-      },
-      {
-        phase: 'Restoration',
-        actions: [
-          'Primary site restoration',
-          'Data synchronization',
-          'Failback procedures',
-          'Post-incident analysis'
-        ]
-      }
-    ]
-  };
-
-  const performanceMetrics = {
-    targets: {
-      tps: '10,000 TPS',
-      latency: '< 100ms (95th percentile)',
-      availability: '99.9% uptime',
-      errorRate: '< 0.1%'
-    },
-    scaling: {
-      horizontal: [
-        'Auto-scaling based on CPU/memory usage',
-        'Load balancer distribution',
-        'Database read replicas',
-        'Redis cluster scaling',
-        'CDN for static content'
-      ],
-      vertical: [
-        'Instance type upgrades',
-        'Memory optimization',
-        'CPU optimization',
-        'Storage performance tuning'
+  const devsecopsPillars = [
+    {
+      title: 'Development Security',
+      icon: '💻',
+      description: 'Integrating security into the development lifecycle',
+      practices: [
+        'Secure coding practices',
+        'Code review with security focus',
+        'Static application security testing (SAST)',
+        'Dependency vulnerability scanning',
+        'Security-focused unit testing'
       ]
     },
-    optimization: {
-      application: [
-        'Connection pooling',
-        'Caching strategies',
-        'Database query optimization',
-        'Code profiling and optimization',
-        'Async processing'
-      ],
-      infrastructure: [
-        'CDN implementation',
-        'Load balancer optimization',
-        'Database indexing',
-        'Network optimization',
-        'Storage performance tuning'
-      ]
-    }
-  };
-
-  const monitoringStack = {
-    infrastructure: [
-      { name: 'Prometheus', purpose: 'Metrics collection and storage' },
-      { name: 'Grafana', purpose: 'Visualization and dashboards' },
-      { name: 'AlertManager', purpose: 'Alert routing and notification' },
-      { name: 'Node Exporter', purpose: 'System metrics collection' }
-    ],
-    application: [
-      { name: 'Jaeger', purpose: 'Distributed tracing' },
-      { name: 'ELK Stack', purpose: 'Log aggregation and analysis' },
-      { name: 'APM Tools', purpose: 'Application performance monitoring' },
-      { name: 'Custom Metrics', purpose: 'Business metrics collection' }
-    ],
-    security: [
-      { name: 'SIEM', purpose: 'Security information and event management' },
-      { name: 'Vulnerability Scanners', purpose: 'Continuous security scanning' },
-      { name: 'Compliance Monitoring', purpose: 'Regulatory compliance tracking' },
-      { name: 'Threat Intelligence', purpose: 'Real-time threat detection' }
-    ]
-  };
-
-  const automationPipelines = {
-    ci: {
-      stages: [
-        {
-          name: 'Code Quality',
-          tools: ['SonarQube', 'ESLint', 'Prettier'],
-          actions: ['Static analysis', 'Code formatting', 'Security scanning']
-        },
-        {
-          name: 'Testing',
-          tools: ['Jest', 'Cypress', 'Postman'],
-          actions: ['Unit tests', 'Integration tests', 'API tests']
-        },
-        {
-          name: 'Security',
-          tools: ['Snyk', 'OWASP ZAP', 'Trivy'],
-          actions: ['Dependency scanning', 'Vulnerability assessment', 'Container scanning']
-        },
-        {
-          name: 'Build',
-          tools: ['Docker', 'Maven', 'npm'],
-          actions: ['Container building', 'Artifact creation', 'Image scanning']
-        }
+    {
+      title: 'Operations Security',
+      icon: '⚙️',
+      description: 'Securing infrastructure and deployment processes',
+      practices: [
+        'Infrastructure as Code (IaC) security',
+        'Container security scanning',
+        'Secrets management',
+        'Network security configuration',
+        'Monitoring and alerting'
       ]
     },
-    cd: {
-      environments: [
-        {
-          name: 'Development',
-          triggers: ['Push to develop branch'],
-          approvals: 'None',
-          rollback: 'Automatic on failure'
-        },
-        {
-          name: 'Staging',
-          triggers: ['Merge to staging branch'],
-          approvals: 'Automated tests',
-          rollback: 'Manual or automatic'
-        },
-        {
-          name: 'Production',
-          triggers: ['Merge to main branch'],
-          approvals: 'Manual approval required',
-          rollback: 'Blue-green deployment'
-        }
+    {
+      title: 'Security Automation',
+      icon: '🤖',
+      description: 'Automating security processes and compliance',
+      practices: [
+        'Automated security testing',
+        'Compliance automation',
+        'Security policy enforcement',
+        'Incident response automation',
+        'Continuous security monitoring'
       ]
-    }
-  };
-
-  const complianceFrameworks = [
-    {
-      name: 'SOC 2 Type II',
-      description: 'Service Organization Control 2 compliance',
-      requirements: [
-        'Security controls implementation',
-        'Access management',
-        'Change management',
-        'Incident response',
-        'Risk assessment'
-      ],
-      tools: ['Vanta', 'Drata', 'Secureframe', 'Custom monitoring']
-    },
-    {
-      name: 'ISO 27001',
-      description: 'Information security management system',
-      requirements: [
-        'Information security policies',
-        'Asset management',
-        'Human resource security',
-        'Physical and environmental security',
-        'Operations security'
-      ],
-      tools: ['ISO 27001 toolkit', 'Risk assessment tools', 'Documentation management']
-    },
-    {
-      name: 'GDPR',
-      description: 'General Data Protection Regulation compliance',
-      requirements: [
-        'Data protection by design',
-        'Consent management',
-        'Data subject rights',
-        'Data breach notification',
-        'Privacy impact assessments'
-      ],
-      tools: ['OneTrust', 'TrustArc', 'Custom privacy tools']
-    },
-    {
-      name: 'PCI DSS',
-      description: 'Payment Card Industry Data Security Standard',
-      requirements: [
-        'Network security',
-        'Vulnerability management',
-        'Access control',
-        'Monitoring and testing',
-        'Information security policy'
-      ],
-      tools: ['Qualys', 'Rapid7', 'Custom PCI tools']
     }
   ];
 
-  const renderArchitectureDiagram = () => (
-    <div className="architecture-diagram">
-      <div className="diagram-header">
-        <h3>{architectures[selectedArchitecture].name}</h3>
-        <p>{architectures[selectedArchitecture].description}</p>
-      </div>
-      
-      <div className="diagram-container">
-        <div className="diagram-layer">
-          <div className="layer-title">Load Balancer / CDN</div>
-          <div className="layer-components">
-            <div className="component">Global Load Balancer</div>
-            <div className="component">CDN</div>
-            <div className="component">WAF</div>
-          </div>
-        </div>
-        
-        <div className="diagram-layer">
-          <div className="layer-title">Application Layer</div>
-          <div className="layer-components">
-            <div className="component">API Gateway</div>
-            <div className="component">Auth Server</div>
-            <div className="component">Resource Server</div>
-            <div className="component">Frontend</div>
-          </div>
-        </div>
-        
-        <div className="diagram-layer">
-          <div className="layer-title">Data Layer</div>
-          <div className="layer-components">
-            <div className="component">Primary DB</div>
-            <div className="component">Read Replicas</div>
-            <div className="component">Redis Cluster</div>
-            <div className="component">Backup Storage</div>
-          </div>
-        </div>
-        
-        <div className="diagram-layer">
-          <div className="layer-title">Monitoring & Security</div>
-          <div className="layer-components">
-            <div className="component">Prometheus</div>
-            <div className="component">Grafana</div>
-            <div className="component">SIEM</div>
-            <div className="component">Vault</div>
-          </div>
-        </div>
-      </div>
-      
-      <div className="architecture-details">
-        <div className="detail-section">
-          <h4>Components</h4>
-          <ul>
-            {architectures[selectedArchitecture].components.map((component, index) => (
-              <li key={index}>{component}</li>
-            ))}
-          </ul>
-        </div>
-        <div className="detail-section">
-          <h4>Security</h4>
-          <p>{architectures[selectedArchitecture].security}</p>
-        </div>
-        <div className="detail-section">
-          <h4>Scaling</h4>
-          <p>{architectures[selectedArchitecture].scaling}</p>
-        </div>
-      </div>
-    </div>
-  );
+  const securityTools = [
+    {
+      category: 'Static Analysis',
+      tools: [
+        { name: 'SonarQube', purpose: 'Code quality and security analysis' },
+        { name: 'OWASP ZAP', purpose: 'Web application security testing' },
+        { name: 'Bandit', purpose: 'Python security linter' },
+        { name: 'SpotBugs', purpose: 'Java static analysis' }
+      ]
+    },
+    {
+      category: 'Dependency Scanning',
+      tools: [
+        { name: 'OWASP Dependency Check', purpose: 'Vulnerability scanning' },
+        { name: 'Snyk', purpose: 'Dependency and container security' },
+        { name: 'WhiteSource', purpose: 'Open source security' },
+        { name: 'GitHub Dependabot', purpose: 'Automated dependency updates' }
+      ]
+    },
+    {
+      category: 'Container Security',
+      tools: [
+        { name: 'Trivy', purpose: 'Container vulnerability scanner' },
+        { name: 'Clair', purpose: 'Container image analysis' },
+        { name: 'Falco', purpose: 'Runtime security monitoring' },
+        { name: 'Anchore', purpose: 'Container security platform' }
+      ]
+    },
+    {
+      category: 'Secrets Management',
+      tools: [
+        { name: 'HashiCorp Vault', purpose: 'Secrets and encryption management' },
+        { name: 'AWS Secrets Manager', purpose: 'Cloud secrets management' },
+        { name: 'Azure Key Vault', purpose: 'Microsoft secrets management' },
+        { name: 'GitGuardian', purpose: 'Secrets detection in code' }
+      ]
+    }
+  ];
 
-  const renderSecurityPractices = () => (
-    <div className="security-practices">
-      <div className="security-section">
-        <h3>🔒 Private Security Practices</h3>
-        {securityPractices.private.map((category, index) => (
-          <div key={index} className="security-category">
-            <h4>{category.category}</h4>
-            <div className="practices-grid">
-              {category.practices.map((practice, pIndex) => (
-                <div key={pIndex} className="practice-card">
-                  <h5>{practice.name}</h5>
-                  <p>{practice.description}</p>
-                  <div className="practice-details">
-                    <strong>Implementation:</strong> {practice.implementation}
-                  </div>
-                  <div className="practice-tools">
-                    <strong>Tools:</strong> {practice.tools.join(', ')}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-      
-      <div className="security-section">
-        <h3>🌐 Public Security Measures</h3>
-        {securityPractices.public.map((category, index) => (
-          <div key={index} className="security-category">
-            <h4>{category.category}</h4>
-            <div className="practices-grid">
-              {category.practices.map((practice, pIndex) => (
-                <div key={pIndex} className="practice-card">
-                  <h5>{practice.name}</h5>
-                  <p>{practice.description}</p>
-                  <div className="practice-details">
-                    <strong>Implementation:</strong> {practice.implementation}
-                  </div>
-                  <div className="practice-tools">
-                    <strong>Tools:</strong> {practice.tools.join(', ')}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  const ciCdPipeline = [
+    {
+      stage: 'Code Commit',
+      security: [
+        'Pre-commit hooks for security checks',
+        'Branch protection rules',
+        'Required security reviews',
+        'Automated dependency scanning'
+      ]
+    },
+    {
+      stage: 'Build',
+      security: [
+        'SAST scanning during build',
+        'Dependency vulnerability checks',
+        'Container image scanning',
+        'Security policy validation'
+      ]
+    },
+    {
+      stage: 'Test',
+      security: [
+        'Dynamic application security testing (DAST)',
+        'Penetration testing automation',
+        'Security regression testing',
+        'Compliance validation'
+      ]
+    },
+    {
+      stage: 'Deploy',
+      security: [
+        'Secrets injection',
+        'Infrastructure security validation',
+        'Runtime security monitoring',
+        'Compliance verification'
+      ]
+    }
+  ];
 
-  const renderDisasterRecovery = () => (
-    <div className="disaster-recovery">
-      <div className="dr-strategies">
-        <h3>🚨 Disaster Recovery Strategies</h3>
-        <div className="strategies-grid">
-          {disasterRecovery.strategies.map((strategy, index) => (
-            <div key={index} className="strategy-card">
-              <h4>{strategy.name}</h4>
-              <p>{strategy.description}</p>
-              <div className="strategy-metrics">
-                <div className="metric">
-                  <strong>RTO:</strong> {strategy.rto}
-                </div>
-                <div className="metric">
-                  <strong>RPO:</strong> {strategy.rpo}
-                </div>
-              </div>
-              <div className="strategy-components">
-                <h5>Components:</h5>
-                <ul>
-                  {strategy.components.map((component, cIndex) => (
-                    <li key={cIndex}>{component}</li>
+  return (
+    <div className="page-container">
+      <div className="page-header">
+        <h1 className="page-title">DevSecOps & Security Automation</h1>
+        <p className="page-subtitle">
+          Integrating security into every phase of the development and operations lifecycle
+        </p>
+      </div>
+
+      <div className="page-content">
+        <section className="section">
+          <div className="section-header">
+            <h2 className="section-title">DevSecOps Pillars</h2>
+            <p className="section-subtitle">
+              Core principles for integrating security into DevOps practices
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {devsecopsPillars.map((pillar, index) => (
+              <div key={index} className="feature-card">
+                <div className="feature-icon">{pillar.icon}</div>
+                <h3 className="feature-title">{pillar.title}</h3>
+                <p className="feature-description mb-4">{pillar.description}</p>
+                <ul className="space-y-2">
+                  {pillar.practices.map((practice, practiceIndex) => (
+                    <li key={practiceIndex} className="flex items-start gap-2 text-secondary">
+                      <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="text-sm">{practice}</span>
+                    </li>
                   ))}
                 </ul>
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      <div className="dr-procedures">
-        <h3>📋 Disaster Recovery Procedures</h3>
-        <div className="procedures-timeline">
-          {disasterRecovery.procedures.map((phase, index) => (
-            <div key={index} className="procedure-phase">
-              <div className="phase-header">
-                <h4>{phase.phase}</h4>
-                <div className="phase-number">{index + 1}</div>
-              </div>
-              <ul>
-                {phase.actions.map((action, aIndex) => (
-                  <li key={aIndex}>{action}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+            ))}
+          </div>
+        </section>
 
-  const renderPerformance = () => (
-    <div className="performance-section">
-      <div className="performance-targets">
-        <h3>⚡ Performance Targets</h3>
-        <div className="targets-grid">
-          {Object.entries(performanceMetrics.targets).map(([key, value]) => (
-            <div key={key} className="target-card">
-              <h4>{key.toUpperCase()}</h4>
-              <div className="target-value">{value}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      <div className="scaling-strategies">
-        <h3>📈 Scaling Strategies</h3>
-        <div className="scaling-container">
-          <div className="scaling-type">
-            <h4>Horizontal Scaling</h4>
-            <ul>
-              {performanceMetrics.scaling.horizontal.map((strategy, index) => (
-                <li key={index}>{strategy}</li>
-              ))}
-            </ul>
+        <section className="section">
+          <div className="section-header">
+            <h2 className="section-title">Security Tools & Technologies</h2>
+            <p className="section-subtitle">
+              Essential tools for implementing DevSecOps practices
+            </p>
           </div>
-          <div className="scaling-type">
-            <h4>Vertical Scaling</h4>
-            <ul>
-              {performanceMetrics.scaling.vertical.map((strategy, index) => (
-                <li key={index}>{strategy}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
-      
-      <div className="optimization-strategies">
-        <h3>🔧 Optimization Strategies</h3>
-        <div className="optimization-container">
-          <div className="optimization-type">
-            <h4>Application Optimization</h4>
-            <ul>
-              {performanceMetrics.optimization.application.map((strategy, index) => (
-                <li key={index}>{strategy}</li>
-              ))}
-            </ul>
-          </div>
-          <div className="optimization-type">
-            <h4>Infrastructure Optimization</h4>
-            <ul>
-              {performanceMetrics.optimization.infrastructure.map((strategy, index) => (
-                <li key={index}>{strategy}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 
-  const renderMonitoring = () => (
-    <div className="monitoring-section">
-      <div className="monitoring-stack">
-        <h3>📊 Monitoring Stack</h3>
-        <div className="stack-categories">
-          <div className="stack-category">
-            <h4>Infrastructure Monitoring</h4>
-            <div className="tools-grid">
-              {monitoringStack.infrastructure.map((tool, index) => (
-                <div key={index} className="tool-card">
-                  <h5>{tool.name}</h5>
-                  <p>{tool.purpose}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="stack-category">
-            <h4>Application Monitoring</h4>
-            <div className="tools-grid">
-              {monitoringStack.application.map((tool, index) => (
-                <div key={index} className="tool-card">
-                  <h5>{tool.name}</h5>
-                  <p>{tool.purpose}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="stack-category">
-            <h4>Security Monitoring</h4>
-            <div className="tools-grid">
-              {monitoringStack.security.map((tool, index) => (
-                <div key={index} className="tool-card">
-                  <h5>{tool.name}</h5>
-                  <p>{tool.purpose}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderAutomation = () => (
-    <div className="automation-section">
-      <div className="ci-pipeline">
-        <h3>🔄 CI/CD Pipeline</h3>
-        <div className="pipeline-stages">
-          <h4>Continuous Integration</h4>
-          <div className="stages-grid">
-            {automationPipelines.ci.stages.map((stage, index) => (
-              <div key={index} className="stage-card">
-                <h5>{stage.name}</h5>
-                <div className="stage-tools">
-                  <strong>Tools:</strong> {stage.tools.join(', ')}
-                </div>
-                <div className="stage-actions">
-                  <strong>Actions:</strong>
-                  <ul>
-                    {stage.actions.map((action, aIndex) => (
-                      <li key={aIndex}>{action}</li>
-                    ))}
-                  </ul>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {securityTools.map((category, index) => (
+              <div key={index} className="content-section">
+                <h3 className="text-lg font-semibold mb-4">{category.category}</h3>
+                <div className="space-y-3">
+                  {category.tools.map((tool, toolIndex) => (
+                    <div key={toolIndex} className="border-l-4 border-primary pl-4">
+                      <h4 className="font-medium text-primary">{tool.name}</h4>
+                      <p className="text-secondary text-sm">{tool.purpose}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
           </div>
-        </div>
-        
-        <div className="cd-pipeline">
-          <h4>Continuous Deployment</h4>
-          <div className="environments-grid">
-            {automationPipelines.cd.environments.map((env, index) => (
-              <div key={index} className="environment-card">
-                <h5>{env.name}</h5>
-                <div className="env-details">
-                  <div><strong>Triggers:</strong> {env.triggers}</div>
-                  <div><strong>Approvals:</strong> {env.approvals}</div>
-                  <div><strong>Rollback:</strong> {env.rollback}</div>
+        </section>
+
+        <section className="section">
+          <div className="section-header">
+            <h2 className="section-title">CI/CD Security Pipeline</h2>
+            <p className="section-subtitle">
+              Security integration at every stage of the continuous integration and deployment pipeline
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {ciCdPipeline.map((stage, index) => (
+              <div key={index} className="content-section">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold text-sm">
+                    {index + 1}
+                  </span>
+                  <h3 className="font-semibold">{stage.stage}</h3>
                 </div>
+                <ul className="space-y-2">
+                  {stage.security.map((item, itemIndex) => (
+                    <li key={itemIndex} className="flex items-start gap-2 text-secondary">
+                      <span className="w-1.5 h-1.5 bg-success rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="text-sm">{item}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
-        </div>
-      </div>
-    </div>
-  );
+        </section>
 
-  const renderCompliance = () => (
-    <div className="compliance-section">
-      <h3>📋 Compliance Frameworks</h3>
-      <div className="compliance-grid">
-        {complianceFrameworks.map((framework, index) => (
-          <div key={index} className="compliance-card">
-            <h4>{framework.name}</h4>
-            <p>{framework.description}</p>
-            <div className="framework-requirements">
-              <h5>Requirements:</h5>
-              <ul>
-                {framework.requirements.map((req, rIndex) => (
-                  <li key={rIndex}>{req}</li>
-                ))}
+        <section className="section">
+          <div className="section-header">
+            <h2 className="section-title">Security Best Practices</h2>
+            <p className="section-subtitle">
+              Essential practices for maintaining security throughout the development lifecycle
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="content-section">
+              <h3 className="text-lg font-semibold mb-3">Development Practices</h3>
+              <ul className="space-y-2 text-secondary">
+                <li>• Implement secure coding standards</li>
+                <li>• Regular security training for developers</li>
+                <li>• Code review with security checklist</li>
+                <li>• Automated security testing in CI/CD</li>
+                <li>• Dependency vulnerability management</li>
+                <li>• Secrets management best practices</li>
               </ul>
             </div>
-            <div className="framework-tools">
-              <h5>Tools:</h5>
-              <p>{framework.tools.join(', ')}</p>
+
+            <div className="content-section">
+              <h3 className="text-lg font-semibold mb-3">Operations Practices</h3>
+              <ul className="space-y-2 text-secondary">
+                <li>• Infrastructure security hardening</li>
+                <li>• Container security scanning</li>
+                <li>• Network segmentation and monitoring</li>
+                <li>• Incident response procedures</li>
+                <li>• Regular security audits</li>
+                <li>• Compliance monitoring and reporting</li>
+              </ul>
             </div>
           </div>
-        ))}
-      </div>
-    </div>
-  );
+        </section>
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'overview':
-        return (
-          <div className="overview-section">
-            <h2>DevOps & DevSecOps Overview</h2>
-            <div className="overview-content">
-              <div className="overview-card">
-                <h3>🚀 What is DevOps?</h3>
-                <p>DevOps is a set of practices that combines software development (Dev) and IT operations (Ops) to shorten the systems development life cycle and provide continuous delivery with high software quality.</p>
-                <ul>
-                  <li>Automated CI/CD pipelines</li>
-                  <li>Infrastructure as Code</li>
-                  <li>Continuous monitoring and feedback</li>
-                  <li>Collaboration and communication</li>
-                </ul>
-              </div>
-              
-              <div className="overview-card">
-                <h3>🔒 What is DevSecOps?</h3>
-                <p>DevSecOps integrates security practices within the DevOps process, creating a 'Security as Code' culture with continuous, flexible collaboration between release engineers and security teams.</p>
-                <ul>
-                  <li>Security integrated into CI/CD</li>
-                  <li>Automated security testing</li>
-                  <li>Continuous security monitoring</li>
-                  <li>Security compliance automation</li>
-                </ul>
-              </div>
-              
-              <div className="overview-card">
-                <h3>🎯 Key Benefits</h3>
-                <ul>
-                  <li><strong>Faster Delivery:</strong> Automated pipelines reduce time to market</li>
-                  <li><strong>Improved Quality:</strong> Continuous testing and monitoring</li>
-                  <li><strong>Enhanced Security:</strong> Security built into every stage</li>
-                  <li><strong>Better Collaboration:</strong> Cross-functional teams</li>
-                  <li><strong>Reduced Risk:</strong> Early detection and prevention</li>
-                </ul>
-              </div>
+        <section className="section">
+          <div className="section-header">
+            <h2 className="section-title">Monitoring & Compliance</h2>
+            <p className="section-subtitle">
+              Continuous monitoring and compliance verification for security assurance
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="content-section text-center">
+              <div className="feature-icon mx-auto mb-3">📊</div>
+              <h3 className="font-semibold mb-2">Security Metrics</h3>
+              <p className="text-secondary text-sm">
+                Track security KPIs, vulnerability trends, and compliance status
+              </p>
+            </div>
+
+            <div className="content-section text-center">
+              <div className="feature-icon mx-auto mb-3">🚨</div>
+              <h3 className="font-semibold mb-2">Alerting</h3>
+              <p className="text-secondary text-sm">
+                Real-time alerts for security incidents and policy violations
+              </p>
+            </div>
+
+            <div className="content-section text-center">
+              <div className="feature-icon mx-auto mb-3">📋</div>
+              <h3 className="font-semibold mb-2">Compliance</h3>
+              <p className="text-secondary text-sm">
+                Automated compliance checking and reporting for regulatory requirements
+              </p>
             </div>
           </div>
-        );
-      case 'architecture':
-        return (
-          <div className="architecture-section">
-            <h2>Architecture Diagrams</h2>
-            <div className="architecture-selector">
-              <button 
-                className={selectedArchitecture === 'development' ? 'active' : ''}
-                onClick={() => setSelectedArchitecture('development')}
-              >
-                Development
-              </button>
-              <button 
-                className={selectedArchitecture === 'staging' ? 'active' : ''}
-                onClick={() => setSelectedArchitecture('staging')}
-              >
-                Staging
-              </button>
-              <button 
-                className={selectedArchitecture === 'production' ? 'active' : ''}
-                onClick={() => setSelectedArchitecture('production')}
-              >
-                Production
-              </button>
-            </div>
-            {renderArchitectureDiagram()}
-          </div>
-        );
-      case 'security':
-        return (
-          <div className="security-section">
-            <h2>Security Practices</h2>
-            {renderSecurityPractices()}
-          </div>
-        );
-      case 'monitoring':
-        return (
-          <div className="monitoring-section">
-            <h2>Monitoring & Observability</h2>
-            {renderMonitoring()}
-          </div>
-        );
-      case 'disaster':
-        return (
-          <div className="disaster-section">
-            <h2>Disaster Recovery</h2>
-            {renderDisasterRecovery()}
-          </div>
-        );
-      case 'performance':
-        return (
-          <div className="performance-section">
-            <h2>Performance & TPS Handling</h2>
-            {renderPerformance()}
-          </div>
-        );
-      case 'automation':
-        return (
-          <div className="automation-section">
-            <h2>Automation & CI/CD</h2>
-            {renderAutomation()}
-          </div>
-        );
-      case 'compliance':
-        return (
-          <div className="compliance-section">
-            <h2>Compliance & Governance</h2>
-            {renderCompliance()}
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <div className="devsecops-container">
-      <div className="devsecops-header">
-        <h1>DevOps & DevSecOps</h1>
-        <p>Comprehensive guide to modern DevOps practices, security integration, and operational excellence</p>
-      </div>
-
-      <div className="devsecops-content">
-        <div className="tabs-container">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              <span className="tab-icon">{tab.icon}</span>
-              <span className="tab-label">{tab.label}</span>
-            </button>
-          ))}
-        </div>
-
-        <div className="content-area">
-          {renderContent()}
-        </div>
+        </section>
       </div>
     </div>
   );

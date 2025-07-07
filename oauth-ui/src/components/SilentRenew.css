@@ -1,105 +1,338 @@
+/* SilentRenew Component Styles - Enterprise Design System */
+
 .silent-renew-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-6);
+}
+
+.silent-renew-header {
   text-align: center;
-  padding: 20px;
-}
-
-.silent-renew-content {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  padding: 40px;
-  border-radius: 15px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  max-width: 400px;
-  width: 100%;
-}
-
-.silent-renew-icon {
-  font-size: 3rem;
-  margin-bottom: 20px;
-  animation: refresh 2s infinite;
+  margin-bottom: var(--spacing-12);
 }
 
 .silent-renew-title {
-  font-size: 1.6rem;
-  margin: 0 0 15px 0;
-  font-weight: 300;
+  font-size: var(--text-4xl);
+  font-weight: var(--font-bold);
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-4);
 }
 
-.silent-renew-message {
-  font-size: 1rem;
-  margin: 0 0 30px 0;
-  opacity: 0.9;
-  line-height: 1.6;
+.silent-renew-subtitle {
+  font-size: var(--text-lg);
+  color: var(--color-secondary);
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-.silent-renew-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-top: 3px solid white;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 20px;
+.silent-renew-status {
+  margin-bottom: var(--spacing-12);
 }
 
-.progress-bar {
+.silent-renew-status-content {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-8);
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.silent-renew-status-icon {
+  font-size: var(--text-6xl);
+  margin-bottom: var(--spacing-6);
+  animation: pulse 2s infinite;
+}
+
+.silent-renew-status-title {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-4);
+}
+
+.silent-renew-status-description {
+  color: var(--color-secondary);
+  font-size: var(--text-lg);
+  margin-bottom: var(--spacing-8);
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: var(--line-height-relaxed);
+}
+
+.silent-renew-progress {
   width: 100%;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 2px;
-  margin-top: 20px;
+  max-width: 400px;
+  margin: 0 auto var(--spacing-6);
+}
+
+.silent-renew-progress-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-sm);
+  color: var(--color-secondary);
+  margin-bottom: var(--spacing-2);
+}
+
+.silent-renew-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--color-secondary-200);
+  border-radius: var(--border-radius-full);
   overflow: hidden;
 }
 
-.progress-fill {
+.silent-renew-progress-fill {
   height: 100%;
-  background: white;
-  border-radius: 2px;
-  animation: progress 3s ease-in-out infinite;
+  background: var(--color-primary);
+  border-radius: var(--border-radius-full);
+  transition: width 0.3s ease-out;
 }
 
-.error-message {
-  background: rgba(220, 53, 69, 0.2);
-  border: 1px solid rgba(220, 53, 69, 0.3);
-  padding: 15px;
-  border-radius: 8px;
-  margin-top: 20px;
+.silent-renew-error {
+  border-left: 4px solid var(--color-error);
+  background: var(--color-error-50);
+  padding: var(--spacing-4);
+  border-radius: var(--border-radius-lg);
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: left;
 }
 
-.retry-button {
-  background: rgba(255, 255, 255, 0.2);
+.silent-renew-error-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-error);
+  margin-bottom: var(--spacing-2);
+}
+
+.silent-renew-error-message {
+  color: var(--color-error);
+  font-size: var(--text-sm);
+  margin-bottom: var(--spacing-3);
+}
+
+.silent-renew-process {
+  margin-bottom: var(--spacing-12);
+}
+
+.silent-renew-process-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-4);
+}
+
+.silent-renew-process-card {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-all);
+}
+
+.silent-renew-process-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.silent-renew-process-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+
+.silent-renew-process-step {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--border-radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-bold);
+  font-size: var(--text-sm);
+  flex-shrink: 0;
+  transition: var(--transition-all);
+}
+
+.silent-renew-process-step.completed {
+  background: var(--color-success);
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 12px 24px;
-  border-radius: 6px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-top: 15px;
 }
 
-.retry-button:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-1px);
+.silent-renew-process-step.active {
+  background: var(--color-primary);
+  color: white;
+  animation: pulse 2s infinite;
 }
 
-@keyframes refresh {
-  0% {
-    transform: rotate(0deg);
+.silent-renew-process-step.pending {
+  background: var(--color-secondary-200);
+  color: var(--color-secondary-600);
+}
+
+.silent-renew-process-info {
+  flex: 1;
+}
+
+.silent-renew-process-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-1);
+}
+
+.silent-renew-process-description {
+  color: var(--color-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+.silent-renew-process-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-secondary-200);
+  border-top: 2px solid var(--color-primary);
+  border-radius: var(--border-radius-full);
+  animation: spin 1s linear infinite;
+  flex-shrink: 0;
+}
+
+.silent-renew-tech-info {
+  margin-bottom: var(--spacing-12);
+}
+
+.silent-renew-tech-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: var(--spacing-6);
+}
+
+.silent-renew-tech-card {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow-sm);
+}
+
+.silent-renew-tech-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-4);
+}
+
+.silent-renew-tech-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.silent-renew-tech-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) 0;
+  color: var(--color-secondary);
+  border-bottom: 1px solid var(--color-border-secondary);
+}
+
+.silent-renew-tech-item:last-child {
+  border-bottom: none;
+}
+
+.silent-renew-tech-bullet {
+  width: 6px;
+  height: 6px;
+  background: var(--color-primary);
+  border-radius: var(--border-radius-full);
+  flex-shrink: 0;
+}
+
+.silent-renew-security {
+  margin-bottom: var(--spacing-12);
+}
+
+.silent-renew-security-content {
+  background: var(--color-info-50);
+  border-left: 4px solid var(--color-info);
+  padding: var(--spacing-4);
+  border-radius: var(--border-radius-lg);
+  margin-bottom: var(--spacing-8);
+}
+
+.silent-renew-security-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-info);
+  margin-bottom: var(--spacing-2);
+}
+
+.silent-renew-security-description {
+  color: var(--color-info);
+  margin-bottom: var(--spacing-3);
+  line-height: var(--line-height-relaxed);
+}
+
+.silent-renew-security-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-4);
+  font-size: var(--text-sm);
+}
+
+.silent-renew-security-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.silent-renew-security-label {
+  font-weight: var(--font-medium);
+  color: var(--color-info);
+}
+
+.silent-renew-security-value {
+  font-family: var(--font-mono);
+  color: var(--color-info-700);
+}
+
+.silent-renew-success {
+  background: var(--color-success-50);
+  border-left: 4px solid var(--color-success);
+  padding: var(--spacing-4);
+  border-radius: var(--border-radius-lg);
+  margin-bottom: var(--spacing-8);
+  text-align: center;
+}
+
+.silent-renew-success-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-success);
+  margin-bottom: var(--spacing-2);
+}
+
+.silent-renew-success-message {
+  color: var(--color-success);
+  margin-bottom: var(--spacing-3);
+  line-height: var(--line-height-relaxed);
+}
+
+.silent-renew-success-note {
+  font-size: var(--text-sm);
+  color: var(--color-success-600);
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
   }
   50% {
-    transform: rotate(180deg);
-  }
-  100% {
-    transform: rotate(360deg);
+    opacity: 0.7;
   }
 }
 
@@ -108,34 +341,79 @@
   100% { transform: rotate(360deg); }
 }
 
-@keyframes progress {
-  0% {
-    width: 0%;
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  50% {
-    width: 60%;
-  }
-  100% {
-    width: 100%;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@media (max-width: 480px) {
-  .silent-renew-content {
-    padding: 30px 20px;
+.silent-renew-process-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.silent-renew-process-card:nth-child(1) { animation-delay: 0.1s; }
+.silent-renew-process-card:nth-child(2) { animation-delay: 0.2s; }
+.silent-renew-process-card:nth-child(3) { animation-delay: 0.3s; }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .silent-renew-container {
+    padding: 0 var(--spacing-4);
   }
-  
+
   .silent-renew-title {
-    font-size: 1.4rem;
+    font-size: var(--text-3xl);
   }
-  
-  .silent-renew-message {
-    font-size: 0.9rem;
+
+  .silent-renew-subtitle {
+    font-size: var(--text-base);
   }
-  
-  .silent-renew-icon {
-    font-size: 2.5rem;
+
+  .silent-renew-status-content {
+    padding: var(--spacing-6);
   }
+
+  .silent-renew-status-icon {
+    font-size: var(--text-5xl);
+  }
+
+  .silent-renew-status-title {
+    font-size: var(--text-xl);
+  }
+
+  .silent-renew-status-description {
+    font-size: var(--text-base);
+  }
+
+  .silent-renew-tech-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .silent-renew-security-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Loading states */
+.silent-renew-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.silent-renew-loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--color-secondary-200);
+  border-top: 4px solid var(--color-primary);
+  border-radius: var(--border-radius-full);
+  animation: spin 1s linear infinite;
 }
 
 /* SilentRenew component doesn't render visible content */

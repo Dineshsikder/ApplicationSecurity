@@ -2,783 +2,388 @@ import React, { useState } from 'react';
 import './FAQ.css';
 
 const FAQ = () => {
-  const [activeCategory, setActiveCategory] = useState('basic');
-  const [expandedQuestions, setExpandedQuestions] = useState(new Set());
+  const [openItem, setOpenItem] = useState(null);
+  const [activeCategory, setActiveCategory] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [copiedKey, setCopiedKey] = useState(null);
 
-  const toggleQuestion = (questionId) => {
-    const newExpanded = new Set(expandedQuestions);
-    if (newExpanded.has(questionId)) {
-      newExpanded.delete(questionId);
+  const getQuestionKey = (categoryTitle, question) => `${categoryTitle}::${question}`;
+
+  const toggleItem = (key) => {
+    setOpenItem(openItem === key ? null : key);
+  };
+
+  const handleCopy = (answer, key) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(answer).then(() => {
+        setCopiedKey(key);
+        setTimeout(() => setCopiedKey(null), 1500);
+      });
     } else {
-      newExpanded.add(questionId);
+      const textarea = document.createElement('textarea');
+      textarea.value = answer;
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        setCopiedKey(key);
+        setTimeout(() => setCopiedKey(null), 1500);
+      } catch (err) {}
+      document.body.removeChild(textarea);
     }
-    setExpandedQuestions(newExpanded);
   };
 
-  const faqData = {
-    basic: [
-      {
-        id: 'basic-1',
-        question: 'Why use short-lived JWTs if revocation is hard?',
-        answer: 'Short TTL minimizes misuse window; combine with refresh rotation & blacklists. Short-lived tokens reduce the attack surface and limit the damage if compromised.',
-        category: 'JWT Security',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-2',
-        question: 'Should I store JWTs in localStorage or cookies?',
-        answer: 'Use HttpOnly, Secure, SameSite cookies to prevent XSS & CSRF. localStorage is vulnerable to XSS attacks, while HttpOnly cookies provide better security.',
-        category: 'Token Storage',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-3',
-        question: 'How often should I rotate signing keys?',
-        answer: 'At least quarterly or after any suspected compromise; automate via JWKS. Regular key rotation is crucial for maintaining security.',
-        category: 'Key Management',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-4',
-        question: "What's PKCE and why is it needed?",
-        answer: 'Proof Key for Code Exchange protects the Authorization Code flow in public clients. It prevents authorization code interception attacks.',
-        category: 'PKCE',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-5',
-        question: 'Can I mix opaque tokens with JWTs?',
-        answer: 'Yes—opaque for refresh tokens, JWT for access tokens to keep size down. This hybrid approach provides security and performance benefits.',
-        category: 'Token Types',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-6',
-        question: 'How to handle multi-tenant key management?',
-        answer: 'Use separate key pairs per tenant or include kid in JWT header and route via JWKS. This ensures proper isolation between tenants.',
-        category: 'Multi-tenancy',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-7',
-        question: "What's the difference between scopes and roles?",
-        answer: 'Scopes are API permissions; roles are higher-level groupings of permissions. Scopes define what resources can be accessed.',
-        category: 'Authorization',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-8',
-        question: 'Is OAuth2 secure for mobile apps?',
-        answer: 'Yes, using Authorization Code + PKCE—never use Implicit flow. PKCE is essential for mobile app security.',
-        category: 'Mobile Security',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-9',
-        question: 'How do I log out a user on all devices?',
-        answer: 'Revoke all refresh tokens or bump a global token-version in user record. This ensures complete session termination.',
-        category: 'Session Management',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-10',
-        question: 'How to monitor token misuse?',
-        answer: 'Log auth events centrally, alert on refresh storms or invalid JWT errors. Monitoring is crucial for detecting attacks.',
-        category: 'Monitoring',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-11',
-        question: 'What is the difference between OAuth2 and OIDC?',
-        answer: 'OAuth2 is for authorization (what you can do), OIDC is for authentication (who you are). OIDC extends OAuth2 with identity layer.',
-        category: 'OAuth2 vs OIDC',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-12',
-        question: 'What are the main OAuth2 grant types?',
-        answer: 'Authorization Code, Implicit, Resource Owner Password Credentials, Client Credentials, and Refresh Token. Authorization Code is most secure.',
-        category: 'Grant Types',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-13',
-        question: 'How do you validate a JWT token?',
-        answer: 'Check signature, verify issuer, audience, expiration time, and not-before time. Use public key from JWKS endpoint.',
-        category: 'JWT Validation',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-14',
-        question: 'What is a refresh token?',
-        answer: 'A long-lived token used to obtain new access tokens without user interaction. Should be stored securely and rotated regularly.',
-        category: 'Token Types',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-15',
-        question: 'What is the purpose of the state parameter?',
-        answer: 'Prevents CSRF attacks by ensuring the response comes from the same request. Should be random and validated.',
-        category: 'Security',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-16',
-        question: 'How do you handle token expiration?',
-        answer: 'Use refresh tokens to get new access tokens, or redirect user to re-authenticate. Implement proper error handling.',
-        category: 'Token Management',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-17',
-        question: 'What is the redirect URI in OAuth2?',
-        answer: 'The URL where the authorization server sends the user after authentication. Must be pre-registered and validated.',
-        category: 'OAuth2 Flow',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-18',
-        question: 'What are OAuth2 scopes?',
-        answer: 'Permissions that define what resources the application can access. Examples: read, write, admin, profile, email.',
-        category: 'Authorization',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-19',
-        question: 'How do you secure OAuth2 in production?',
-        answer: 'Use HTTPS, implement PKCE, validate redirect URIs, use short-lived tokens, implement proper error handling.',
-        category: 'Security',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-20',
-        question: 'What is the difference between public and confidential clients?',
-        answer: 'Public clients cannot keep secrets (mobile apps, SPAs), confidential clients can (server-side apps). Different security requirements.',
-        category: 'Client Types',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-21',
-        question: 'What is token introspection?',
-        answer: 'A way to check if a token is valid by asking the authorization server. Useful for opaque tokens.',
-        category: 'Token Validation',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-22',
-        question: 'How do you implement logout in OAuth2?',
-        answer: 'Revoke tokens, clear client-side storage, redirect to logout endpoint. Consider end-session endpoint for OIDC.',
-        category: 'Session Management',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-23',
-        question: 'What is the purpose of the nonce parameter?',
-        answer: 'Prevents replay attacks in OIDC by ensuring ID tokens are used only once. Should be random and validated.',
-        category: 'OIDC Security',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-24',
-        question: 'How do you handle OAuth2 errors?',
-        answer: 'Check error codes (invalid_request, invalid_client, invalid_grant, etc.), implement proper error handling and user feedback.',
-        category: 'Error Handling',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-25',
-        question: 'What is the difference between access and ID tokens?',
-        answer: 'Access tokens are for API access, ID tokens contain user identity information. ID tokens are JWTs, access tokens can be opaque.',
-        category: 'Token Types',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-26',
-        question: 'How do you implement OAuth2 in a web application?',
-        answer: 'Use Authorization Code flow with PKCE, store tokens securely, implement proper redirect handling and error management.',
-        category: 'Implementation',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-27',
-        question: 'What is the purpose of the client_id?',
-        answer: 'Identifies the application to the authorization server. Must be registered and validated.',
-        category: 'OAuth2 Basics',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-28',
-        question: 'How do you handle OAuth2 in microservices?',
-        answer: 'Use JWT tokens, implement token validation, consider centralized auth service, use proper service-to-service authentication.',
-        category: 'Microservices',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-29',
-        question: 'What is the difference between authorization and authentication?',
-        answer: 'Authentication verifies identity (who you are), authorization determines permissions (what you can do). OAuth2 handles authorization.',
-        category: 'Concepts',
-        difficulty: 'Basic'
-      },
-      {
-        id: 'basic-30',
-        question: 'How do you test OAuth2 implementations?',
-        answer: 'Use OAuth2 testing tools, test all flows, validate error scenarios, test token validation, use mock authorization servers.',
-        category: 'Testing',
-        difficulty: 'Basic'
-      }
-    ],
-    advanced: [
-      {
-        id: 'advanced-1',
-        question: 'Explain the OAuth2 Authorization Code flow with PKCE.',
-        answer: 'User agent requests /authorize with code_challenge; after login, app exchanges code + code_verifier at /token; PKCE prevents interception of auth code by ensuring only the original client can redeem it. The code_challenge is a SHA256 hash of the code_verifier.',
-        category: 'OAuth2 Flow',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-2',
-        question: 'How would you implement immediate JWT revocation?',
-        answer: 'Embed a jti and session version in JWT; store active jti in Redis/DB; on logout, mark it revoked; API checks jti on each request. This provides real-time revocation capabilities.',
-        category: 'JWT Revocation',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-3',
-        question: 'What are the security risks of using localStorage for tokens?',
-        answer: 'Vulnerable to XSS theft; better to use HttpOnly cookies, and store minimal data client-side. localStorage is accessible via JavaScript, making it a target for XSS attacks.',
-        category: 'Security Risks',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-4',
-        question: "Compare OAuth2's Client Credentials vs. Authorization Code grants.",
-        answer: 'Client Credentials is machine-to-machine: no user context. Authorization Code is user-centric: requires user login, consent, and returns ID Token. Choose based on the use case.',
-        category: 'Grant Types',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-5',
-        question: 'How do you secure microservices with JWTs and prevent replay attacks?',
-        answer: 'Use HTTPS, short TTL, nonce or jti checks, HTTPS mutual TLS for service-to-service, and rotate keys often. Implement proper token validation and monitoring.',
-        category: 'Microservices Security',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-6',
-        question: 'Explain JWT signature verification and key rotation strategies.',
-        answer: 'Verify signature using public key from JWKS; implement key rotation with overlapping validity periods; use kid header to identify signing key; cache JWKS for performance.',
-        category: 'JWT Security',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-7',
-        question: 'How to implement OAuth2 with multiple identity providers?',
-        answer: 'Use OIDC discovery endpoints; implement provider-specific adapters; handle different claim formats; implement proper error handling and fallback mechanisms.',
-        category: 'Multi-Provider',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-8',
-        question: 'What are the security implications of JWT size limitations?',
-        answer: 'Large JWTs impact performance; consider using opaque tokens for large claims; implement claim compression; use external storage for non-essential data.',
-        category: 'Performance',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-9',
-        question: 'How to implement OAuth2 in a serverless architecture?',
-        answer: 'Use stateless JWT validation; implement proper caching strategies; handle cold starts; use managed services for token storage and validation.',
-        category: 'Serverless',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-10',
-        question: 'Explain OAuth2 threat models and mitigation strategies.',
-        answer: 'Threats include CSRF, XSS, authorization code interception, token theft; mitigate with PKCE, proper redirect URIs, secure token storage, and comprehensive monitoring.',
-        category: 'Security',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-11',
-        question: 'How to implement OAuth2 with custom claims and user attributes?',
-        answer: 'Extend JWT with custom claims; implement claim mapping; validate claim format; consider privacy implications; implement claim filtering.',
-        category: 'Custom Claims',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-12',
-        question: 'What are the performance implications of JWT validation?',
-        answer: 'Signature verification is CPU-intensive; implement caching; use CDN for JWKS; consider token size; optimize validation algorithms.',
-        category: 'Performance',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-13',
-        question: 'How to implement OAuth2 with API rate limiting?',
-        answer: 'Use token-based rate limiting; implement sliding windows; consider user vs client limits; use Redis for distributed rate limiting.',
-        category: 'Rate Limiting',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-14',
-        question: 'Explain OAuth2 consent and authorization patterns.',
-        answer: 'Implement granular consent; use scopes for permission grouping; implement consent revocation; provide clear consent UI; audit consent changes.',
-        category: 'Consent Management',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-15',
-        question: 'How to implement OAuth2 with event-driven architecture?',
-        answer: 'Publish auth events; implement event sourcing; use message queues; handle event ordering; implement event replay capabilities.',
-        category: 'Event-Driven',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-16',
-        question: 'What are the security considerations for OAuth2 in IoT devices?',
-        answer: 'Use device certificates; implement constrained tokens; handle offline scenarios; implement secure key storage; use lightweight protocols.',
-        category: 'IoT Security',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-17',
-        question: 'How to implement OAuth2 with blockchain-based identity?',
-        answer: 'Use DIDs (Decentralized Identifiers); implement verifiable credentials; handle on-chain verification; integrate with traditional OAuth2 flows.',
-        category: 'Blockchain',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-18',
-        question: 'Explain OAuth2 federation and trust relationships.',
-        answer: 'Establish trust between providers; implement metadata exchange; handle certificate validation; implement proper error handling; consider legal agreements.',
-        category: 'Federation',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-19',
-        question: 'How to implement OAuth2 with zero-knowledge proofs?',
-        answer: 'Use selective disclosure; implement proof generation; validate proofs; consider privacy implications; integrate with existing flows.',
-        category: 'Privacy',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-20',
-        question: 'What are the implications of OAuth2 in edge computing?',
-        answer: 'Implement edge token validation; use distributed JWKS; handle network partitions; implement eventual consistency; optimize for low latency.',
-        category: 'Edge Computing',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-21',
-        question: 'How to implement OAuth2 with quantum-resistant cryptography?',
-        answer: 'Use post-quantum algorithms; implement hybrid schemes; plan for migration; maintain backward compatibility; monitor quantum computing developments.',
-        category: 'Quantum Security',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-22',
-        question: 'Explain OAuth2 with homomorphic encryption.',
-        answer: 'Process encrypted data; implement secure computation; handle performance implications; consider use cases; implement proper key management.',
-        category: 'Advanced Crypto',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-23',
-        question: 'How to implement OAuth2 with differential privacy?',
-        answer: 'Add noise to data; implement privacy budgets; handle utility vs privacy trade-offs; consider regulatory compliance; implement proper auditing.',
-        category: 'Privacy',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-24',
-        question: 'What are the security implications of OAuth2 in 5G networks?',
-        answer: 'Handle network slicing; implement edge authentication; consider latency requirements; implement proper key management; handle roaming scenarios.',
-        category: '5G Security',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-25',
-        question: 'How to implement OAuth2 with federated learning?',
-        answer: 'Share models securely; implement privacy-preserving aggregation; handle model poisoning; consider regulatory compliance; implement proper auditing.',
-        category: 'ML Security',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-26',
-        question: 'Explain OAuth2 with secure multi-party computation.',
-        answer: 'Compute on distributed data; implement secure protocols; handle performance implications; consider trust assumptions; implement proper key management.',
-        category: 'Advanced Crypto',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-27',
-        question: 'How to implement OAuth2 with confidential computing?',
-        answer: 'Use trusted execution environments; implement attestation; handle key management; consider performance implications; implement proper monitoring.',
-        category: 'Confidential Computing',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-28',
-        question: 'What are the implications of OAuth2 in satellite communications?',
-        answer: 'Handle high latency; implement offline capabilities; consider bandwidth constraints; implement proper key management; handle intermittent connectivity.',
-        category: 'Satellite Security',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-29',
-        question: 'How to implement OAuth2 with post-quantum signatures?',
-        answer: 'Use quantum-resistant algorithms; implement hybrid schemes; plan for migration; maintain backward compatibility; monitor quantum computing developments.',
-        category: 'Quantum Security',
-        difficulty: 'Advanced'
-      },
-      {
-        id: 'advanced-30',
-        question: 'Explain OAuth2 with secure hardware modules.',
-        answer: 'Use HSMs for key storage; implement secure key generation; handle key backup; consider performance implications; implement proper monitoring.',
-        category: 'Hardware Security',
-        difficulty: 'Advanced'
-      }
-    ],
-    expert: [
-      {
-        id: 'expert-1',
-        question: 'Design a distributed OAuth2 system with high availability.',
-        answer: 'Use distributed caching (Redis Cluster); implement stateless JWT validation; use load balancers with sticky sessions; implement circuit breakers and fallback mechanisms.',
-        category: 'Architecture',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-2',
-        question: 'How to implement OAuth2 with blockchain-based identity?',
-        answer: 'Use DIDs (Decentralized Identifiers); implement verifiable credentials; handle on-chain verification; integrate with traditional OAuth2 flows.',
-        category: 'Blockchain',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-3',
-        question: 'Explain OAuth2 security in IoT environments.',
-        answer: 'Use device certificates; implement constrained tokens; handle offline scenarios; implement secure key storage; use lightweight protocols.',
-        category: 'IoT Security',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-4',
-        question: 'How to implement OAuth2 with quantum-resistant cryptography?',
-        answer: 'Use post-quantum algorithms; implement hybrid schemes; plan for migration; maintain backward compatibility; monitor quantum computing developments.',
-        category: 'Quantum Security',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-5',
-        question: 'Design an OAuth2 system for edge computing.',
-        answer: 'Implement edge token validation; use distributed JWKS; handle network partitions; implement eventual consistency; optimize for low latency.',
-        category: 'Edge Computing',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-6',
-        question: 'How to implement OAuth2 with zero-knowledge proofs at scale?',
-        answer: 'Use efficient ZKP protocols; implement batch verification; handle proof generation; consider privacy implications; implement proper key management.',
-        category: 'Advanced Privacy',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-7',
-        question: 'Design a quantum-secure OAuth2 system.',
-        answer: 'Use post-quantum algorithms; implement quantum key distribution; handle key management; consider performance implications; implement proper monitoring.',
-        category: 'Quantum Security',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-8',
-        question: 'How to implement OAuth2 with homomorphic encryption for privacy?',
-        answer: 'Process encrypted data; implement secure computation; handle performance implications; consider use cases; implement proper key management.',
-        category: 'Advanced Crypto',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-9',
-        question: 'Design an OAuth2 system for satellite networks.',
-        answer: 'Handle high latency; implement offline capabilities; consider bandwidth constraints; implement proper key management; handle intermittent connectivity.',
-        category: 'Satellite Security',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-10',
-        question: 'How to implement OAuth2 with secure multi-party computation?',
-        answer: 'Compute on distributed data; implement secure protocols; handle performance implications; consider trust assumptions; implement proper key management.',
-        category: 'Advanced Crypto',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-11',
-        question: 'Design a privacy-preserving OAuth2 system.',
-        answer: 'Implement differential privacy; use zero-knowledge proofs; handle privacy budgets; consider regulatory compliance; implement proper auditing.',
-        category: 'Privacy',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-12',
-        question: 'How to implement OAuth2 with confidential computing?',
-        answer: 'Use trusted execution environments; implement attestation; handle key management; consider performance implications; implement proper monitoring.',
-        category: 'Confidential Computing',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-13',
-        question: 'Design an OAuth2 system for quantum networks.',
-        answer: 'Use quantum key distribution; implement quantum-resistant algorithms; handle quantum entanglement; consider performance implications; implement proper monitoring.',
-        category: 'Quantum Networks',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-14',
-        question: 'How to implement OAuth2 with federated learning?',
-        answer: 'Share models securely; implement privacy-preserving aggregation; handle model poisoning; consider regulatory compliance; implement proper auditing.',
-        category: 'ML Security',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-15',
-        question: 'Design a post-quantum OAuth2 system.',
-        answer: 'Use quantum-resistant algorithms; implement hybrid schemes; plan for migration; maintain backward compatibility; monitor quantum computing developments.',
-        category: 'Quantum Security',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-16',
-        question: 'How to implement OAuth2 with secure hardware modules?',
-        answer: 'Use HSMs for key storage; implement secure key generation; handle key backup; consider performance implications; implement proper monitoring.',
-        category: 'Hardware Security',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-17',
-        question: 'Design an OAuth2 system for 6G networks.',
-        answer: 'Handle terahertz communications; implement AI-driven security; consider energy efficiency; implement proper key management; handle massive connectivity.',
-        category: '6G Security',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-18',
-        question: 'How to implement OAuth2 with quantum machine learning?',
-        answer: 'Use quantum algorithms; implement quantum neural networks; handle quantum advantage; consider performance implications; implement proper monitoring.',
-        category: 'Quantum ML',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-19',
-        question: 'Design a quantum-resistant OAuth2 system.',
-        answer: 'Use post-quantum algorithms; implement quantum key distribution; handle key management; consider performance implications; implement proper monitoring.',
-        category: 'Quantum Security',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-20',
-        question: 'How to implement OAuth2 with quantum internet?',
-        answer: 'Use quantum entanglement; implement quantum repeaters; handle quantum memory; consider performance implications; implement proper monitoring.',
-        category: 'Quantum Internet',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-21',
-        question: 'Design an OAuth2 system for space-based computing.',
-        answer: 'Handle radiation effects; implement fault tolerance; consider power constraints; implement proper key management; handle communication delays.',
-        category: 'Space Computing',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-22',
-        question: 'How to implement OAuth2 with quantum sensors?',
-        answer: 'Use quantum sensing; implement quantum metrology; handle quantum noise; consider performance implications; implement proper monitoring.',
-        category: 'Quantum Sensors',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-23',
-        question: 'Design a quantum-secure OAuth2 system for IoT.',
-        answer: 'Use quantum-resistant algorithms; implement quantum key distribution; handle constrained devices; consider performance implications; implement proper monitoring.',
-        category: 'Quantum IoT',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-24',
-        question: 'How to implement OAuth2 with quantum random number generation?',
-        answer: 'Use quantum entropy; implement quantum random number generators; handle quantum noise; consider performance implications; implement proper monitoring.',
-        category: 'Quantum Randomness',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-25',
-        question: 'Design an OAuth2 system for quantum cloud computing.',
-        answer: 'Use quantum processors; implement quantum algorithms; handle quantum advantage; consider performance implications; implement proper monitoring.',
-        category: 'Quantum Cloud',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-26',
-        question: 'How to implement OAuth2 with quantum-resistant signatures?',
-        answer: 'Use post-quantum signature schemes; implement hybrid signatures; handle key management; consider performance implications; implement proper monitoring.',
-        category: 'Quantum Signatures',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-27',
-        question: 'Design a quantum-secure OAuth2 system for edge computing.',
-        answer: 'Use quantum-resistant algorithms; implement quantum key distribution; handle edge constraints; consider performance implications; implement proper monitoring.',
-        category: 'Quantum Edge',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-28',
-        question: 'How to implement OAuth2 with quantum-resistant encryption?',
-        answer: 'Use post-quantum encryption schemes; implement hybrid encryption; handle key management; consider performance implications; implement proper monitoring.',
-        category: 'Quantum Encryption',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-29',
-        question: 'Design a quantum-secure OAuth2 system for 5G/6G.',
-        answer: 'Use quantum-resistant algorithms; implement quantum key distribution; handle network slicing; consider performance implications; implement proper monitoring.',
-        category: 'Quantum Networks',
-        difficulty: 'Expert'
-      },
-      {
-        id: 'expert-30',
-        question: 'How to implement OAuth2 with quantum-resistant authentication?',
-        answer: 'Use post-quantum authentication schemes; implement quantum key distribution; handle key management; consider performance implications; implement proper monitoring.',
-        category: 'Quantum Authentication',
-        difficulty: 'Expert'
-      }
-    ]
-  };
-
-  const categories = [
-    { id: 'basic', name: 'Basic Questions', icon: '🔰', count: faqData.basic.length },
-    { id: 'advanced', name: 'Advanced Questions', icon: '⚡', count: faqData.advanced.length },
-    { id: 'expert', name: 'Expert Questions', icon: '🚀', count: faqData.expert.length }
+  // 30 best and important questions for each section
+  const faqCategories = [
+    {
+      title: 'Basic OAuth2 Questions',
+      icon: '🔰',
+      color: 'from-blue-500 to-cyan-500',
+      bgColor: 'bg-blue-50',
+      borderColor: 'border-blue-200',
+      questions: [
+        { question: 'What is OAuth2?', answer: 'OAuth2 is an authorization framework that allows third-party applications to access user resources without sharing credentials.', tags: ['fundamentals', 'security'] },
+        { question: 'What is the difference between OAuth2 and OpenID Connect?', answer: 'OAuth2 is for authorization, OpenID Connect (OIDC) is for authentication built on top of OAuth2.', tags: ['fundamentals', 'oidc'] },
+        { question: 'What is an access token?', answer: 'A credential used to access protected resources, issued by the authorization server.', tags: ['tokens'] },
+        { question: 'What is a refresh token?', answer: 'A credential used to obtain new access tokens without user interaction.', tags: ['tokens'] },
+        { question: 'What is a client ID?', answer: 'A public identifier for apps, issued by the authorization server.', tags: ['client'] },
+        { question: 'What is a client secret?', answer: 'A confidential value used by confidential clients to authenticate to the authorization server.', tags: ['client'] },
+        { question: 'What is a redirect URI?', answer: 'The endpoint to which the authorization server sends the user after authorization.', tags: ['redirect'] },
+        { question: 'What is the state parameter?', answer: 'Used to prevent CSRF attacks and maintain state between request and callback.', tags: ['security'] },
+        { question: 'What is the scope parameter?', answer: 'Specifies the level of access requested by the client.', tags: ['scopes'] },
+        { question: 'What is the audience parameter?', answer: 'Specifies the intended recipient of the token.', tags: ['tokens'] },
+        { question: 'What is the authorization server?', answer: 'Responsible for authenticating users and issuing tokens.', tags: ['architecture'] },
+        { question: 'What is the resource server?', answer: 'Hosts protected resources and validates access tokens.', tags: ['architecture'] },
+        { question: 'What is the OAuth2 client?', answer: 'The application requesting access to protected resources.', tags: ['architecture'] },
+        { question: 'What is the Authorization Code flow?', answer: 'The most secure OAuth2 flow, used by web apps to obtain tokens via a backend server.', tags: ['flows'] },
+        { question: 'What is the Implicit flow?', answer: 'A legacy OAuth2 flow for browser-based apps, now discouraged in favor of Authorization Code with PKCE.', tags: ['flows'] },
+        { question: 'What is PKCE?', answer: 'Proof Key for Code Exchange, a security extension for OAuth2 that prevents code interception attacks.', tags: ['security', 'pkce'] },
+        { question: 'What is the client credentials flow?', answer: 'Used for server-to-server authentication, where no user is involved.', tags: ['flows'] },
+        { question: 'What is the Resource Owner Password flow?', answer: 'A legacy flow where the user provides credentials directly to the client. Not recommended.', tags: ['flows'] },
+        { question: 'What is the Device Authorization flow?', answer: 'Used for devices with limited input capabilities, like smart TVs.', tags: ['flows'] },
+        { question: 'What is consent in OAuth2?', answer: 'The process where the user approves the permissions requested by the client.', tags: ['consent'] },
+        { question: 'What is token expiration?', answer: 'The time after which a token is no longer valid.', tags: ['tokens'] },
+        { question: 'What is token revocation?', answer: 'The process of invalidating a token before it expires.', tags: ['tokens'] },
+        { question: 'What is token introspection?', answer: 'A process where a resource server validates a token by querying the authorization server.', tags: ['tokens'] },
+        { question: 'What is OpenID Connect?', answer: 'An authentication layer built on top of OAuth2.', tags: ['oidc'] },
+        { question: 'What is an ID token?', answer: 'A token used in OIDC to convey identity information about the user.', tags: ['oidc', 'tokens'] },
+        { question: 'What is the userinfo endpoint?', answer: 'An OIDC endpoint that returns user profile information.', tags: ['oidc'] },
+        { question: 'What is a refresh token rotation?', answer: 'A security technique where a new refresh token is issued each time the old one is used.', tags: ['security', 'tokens'] },
+        { question: 'What is the difference between authorization and authentication?', answer: 'Authorization is about permissions, authentication is about identity.', tags: ['fundamentals'] },
+        { question: 'What is a bearer token?', answer: 'A token that grants access to a resource, where possession of the token is sufficient for access.', tags: ['tokens'] },
+        { question: 'What is the purpose of the response_type parameter?', answer: 'Indicates which OAuth2 flow is being used (e.g., code, token).', tags: ['flows'] },
+      ],
+    },
+    {
+      title: 'Intermediate OAuth2 Questions',
+      icon: '⚡',
+      color: 'from-purple-500 to-pink-500',
+      bgColor: 'bg-purple-50',
+      borderColor: 'border-purple-200',
+      questions: [
+        { question: 'How should I securely store OAuth2 tokens?', answer: 'Store access tokens in memory for web applications, use secure storage for mobile apps, and never store them in localStorage or cookies.', tags: ['security', 'implementation'] },
+        { question: 'What are common OAuth2 security vulnerabilities?', answer: 'Authorization code interception, CSRF, open redirect, token storage vulnerabilities, insufficient scope validation.', tags: ['security', 'vulnerabilities'] },
+        { question: 'How do I implement proper token validation?', answer: 'Check signature, issuer, audience, expiration, issued at, and custom claims.', tags: ['implementation', 'security'] },
+        { question: 'How do I integrate OAuth2 with Spring Boot?', answer: 'Use Spring Security OAuth2 Client, configure properties, set up security config, and implement custom user service if needed.', tags: ['implementation', 'spring'] },
+        { question: 'What are best practices for OAuth2 in React apps?', answer: 'Use libraries like oidc-client-js, implement silent token renewal, secure token storage, error handling, and state management.', tags: ['implementation', 'react'] },
+        { question: 'How do I handle OAuth2 token refresh?', answer: 'Implement automatic token refresh, secure storage, rotation, error handling, and fallback to re-authentication.', tags: ['implementation', 'tokens'] },
+        { question: 'How do I debug OAuth2 authentication issues?', answer: 'Inspect network requests, check provider logs, validate redirect URIs, verify client credentials, check token contents, monitor logs, use debugging tools.', tags: ['debugging', 'troubleshooting'] },
+        { question: 'What are common OAuth2 error codes?', answer: 'invalid_client, invalid_grant, invalid_redirect_uri, invalid_scope, access_denied, server_error.', tags: ['troubleshooting', 'errors'] },
+        { question: 'How do I implement OAuth2 logout?', answer: 'Implement client-side and server-side logout, use OIDC end session endpoint, clear session data, implement logout confirmation.', tags: ['implementation', 'logout'] },
+        { question: 'How do I implement role-based access control?', answer: 'Use OAuth2 scopes for permissions, custom claims for roles, validate scopes and roles on client and server.', tags: ['implementation', 'rbac'] },
+        { question: 'What is the difference between public and confidential clients?', answer: 'Public clients cannot keep secrets (e.g., SPAs), confidential clients can (e.g., server apps).', tags: ['client'] },
+        { question: 'How do I use the state parameter securely?', answer: 'Generate a random value, store it in session, verify it on callback.', tags: ['security'] },
+        { question: 'What is the purpose of the nonce parameter in OIDC?', answer: 'Prevents replay attacks by binding the ID token to the authentication request.', tags: ['oidc', 'security'] },
+        { question: 'How do I validate an ID token?', answer: 'Check signature, issuer, audience, expiration, nonce, and claims.', tags: ['oidc', 'security'] },
+        { question: 'What is token binding?', answer: 'A technique to bind a token to a specific client or device, preventing token theft.', tags: ['security'] },
+        { question: 'How do I implement consent screens?', answer: 'Show requested scopes, allow user to approve/deny, record consent, and handle consent withdrawal.', tags: ['consent'] },
+        { question: 'What is dynamic client registration?', answer: 'Allows clients to register with the authorization server at runtime.', tags: ['client'] },
+        { question: 'How do I implement multi-factor authentication with OAuth2?', answer: 'Integrate MFA at the authorization server, require additional verification during login.', tags: ['security', 'mfa'] },
+        { question: 'What is the difference between access and ID tokens?', answer: 'Access tokens are for resource access, ID tokens are for user identity.', tags: ['tokens', 'oidc'] },
+        { question: 'How do I handle token revocation?', answer: 'Implement a revocation endpoint, allow clients to revoke tokens, and check token status on the resource server.', tags: ['tokens', 'security'] },
+        { question: 'What is the purpose of the prompt parameter?', answer: 'Controls whether the user is prompted for login or consent.', tags: ['oidc'] },
+        { question: 'How do I implement token introspection?', answer: 'Expose an endpoint for resource servers to validate tokens with the authorization server.', tags: ['tokens'] },
+        { question: 'What is the difference between implicit and hybrid flows?', answer: 'Implicit flow is for SPAs (now discouraged), hybrid flow combines code and token for OIDC.', tags: ['flows', 'oidc'] },
+        { question: 'How do I secure redirect URIs?', answer: 'Use exact matching, HTTPS, and avoid wildcards.', tags: ['security', 'redirect'] },
+        { question: 'What is the difference between offline_access and online_access scopes?', answer: 'offline_access allows refresh tokens, online_access is for immediate access.', tags: ['scopes'] },
+        { question: 'How do I implement token expiration and renewal?', answer: 'Set short lifetimes for access tokens, use refresh tokens for renewal.', tags: ['tokens'] },
+        { question: 'What is the purpose of the audience claim?', answer: 'Specifies the intended recipient of the token.', tags: ['tokens'] },
+        { question: 'How do I handle user consent withdrawal?', answer: 'Allow users to revoke consent, remove granted scopes, and invalidate tokens.', tags: ['consent'] },
+        { question: 'What is the difference between SSO and OAuth2?', answer: 'SSO is a use case, OAuth2 is a protocol. OAuth2 can enable SSO.', tags: ['fundamentals'] },
+        { question: 'How do I implement PKCE in SPAs?', answer: 'Generate a code verifier and challenge, use them in the authorization request and token exchange.', tags: ['pkce', 'security'] },
+      ],
+    },
+    {
+      title: 'Expert OAuth2 Questions',
+      icon: '🚀',
+      color: 'from-orange-500 to-red-500',
+      bgColor: 'bg-orange-50',
+      borderColor: 'border-orange-200',
+      questions: [
+        { question: 'How do I implement OAuth2 token introspection with caching?', answer: 'Use Redis or in-memory caching for introspection results, implement cache invalidation, and handle introspection failures gracefully.', tags: ['advanced', 'caching'] },
+        { question: 'How do I implement JWT token rotation?', answer: 'Issue new JWTs on refresh, use refresh token rotation, and validate old tokens for revocation.', tags: ['advanced', 'security'] },
+        { question: 'How do I implement mutual TLS authentication?', answer: 'Configure mTLS on the authorization server, require client certificates, and validate them on each request.', tags: ['advanced', 'mTLS'] },
+        { question: 'How do I use hardware security modules (HSM) with OAuth2?', answer: 'Store signing keys in HSMs, use them for token signing and validation, and rotate keys securely.', tags: ['advanced', 'hsm'] },
+        { question: 'How do I implement zero-knowledge proofs in OAuth2?', answer: 'Use ZKP libraries to prove identity or claims without revealing secrets, integrate with the authorization server.', tags: ['advanced', 'zkp'] },
+        { question: 'How do I implement blockchain-based identity with OAuth2?', answer: 'Use decentralized identifiers (DIDs), smart contracts, and blockchain-based claims in the OAuth2 flow.', tags: ['advanced', 'blockchain'] },
+        { question: 'How do I implement quantum-resistant cryptography in OAuth2?', answer: 'Use quantum-safe algorithms for key exchange and token signing, and update libraries as standards evolve.', tags: ['advanced', 'quantum'] },
+        { question: 'How do I implement homomorphic encryption in OAuth2?', answer: 'Use homomorphic encryption for sensitive data, process encrypted data without decryption, and manage keys securely.', tags: ['advanced', 'encryption'] },
+        { question: 'How do I implement federated identity management?', answer: 'Integrate with multiple identity providers, use SAML or OIDC federation, and manage user mapping.', tags: ['advanced', 'federation'] },
+        { question: 'How do I implement attribute-based access control (ABAC)?', answer: 'Use user and resource attributes in access decisions, enforce policies at the resource server.', tags: ['advanced', 'abac'] },
+        { question: 'How do I implement fine-grained scopes and permissions?', answer: 'Define granular scopes, use claims for detailed permissions, and validate on the resource server.', tags: ['advanced', 'scopes'] },
+        { question: 'How do I secure OAuth2 for microservices?', answer: 'Use JWTs for stateless auth, validate tokens at each service, and use service-to-service scopes.', tags: ['advanced', 'microservices'] },
+        { question: 'How do I implement distributed session management?', answer: 'Use centralized token storage, synchronize revocation, and propagate logout events.', tags: ['advanced', 'sessions'] },
+        { question: 'How do I implement consent management at scale?', answer: 'Store user consents, allow granular consent, and provide consent dashboards.', tags: ['advanced', 'consent'] },
+        { question: 'How do I implement OAuth2 for IoT devices?', answer: 'Use device flow, secure device credentials, and limit token lifetimes.', tags: ['advanced', 'iot'] },
+        { question: 'How do I implement OAuth2 for mobile apps?', answer: 'Use PKCE, secure token storage, and handle app switching securely.', tags: ['advanced', 'mobile'] },
+        { question: 'How do I implement OAuth2 for SPAs?', answer: 'Use Authorization Code with PKCE, store tokens in memory, and handle silent renewals.', tags: ['advanced', 'spa'] },
+        { question: 'How do I implement OAuth2 for APIs?', answer: 'Use client credentials flow, validate scopes, and use API gateways for enforcement.', tags: ['advanced', 'api'] },
+        { question: 'How do I implement OAuth2 for B2B scenarios?', answer: 'Support multi-tenancy, delegated admin, and partner integrations.', tags: ['advanced', 'b2b'] },
+        { question: 'How do I implement OAuth2 for B2C scenarios?', answer: 'Support social login, user registration, and consent management.', tags: ['advanced', 'b2c'] },
+        { question: 'How do I implement OAuth2 for healthcare?', answer: 'Comply with regulations (e.g., HIPAA), use SMART on FHIR, and secure PHI.', tags: ['advanced', 'healthcare'] },
+        { question: 'How do I implement OAuth2 for financial services?', answer: 'Comply with regulations (e.g., PSD2), use strong customer authentication, and secure transactions.', tags: ['advanced', 'finance'] },
+        { question: 'How do I implement OAuth2 for government?', answer: 'Support eIDAS, integrate with national ID providers, and ensure data sovereignty.', tags: ['advanced', 'government'] },
+        { question: 'How do I implement OAuth2 for education?', answer: 'Integrate with campus identity providers, support SSO, and manage student consent.', tags: ['advanced', 'education'] },
+        { question: 'How do I implement OAuth2 for enterprise SSO?', answer: 'Integrate with corporate directories, support SAML/OIDC, and manage user provisioning.', tags: ['advanced', 'sso'] },
+        { question: 'How do I implement OAuth2 for SaaS platforms?', answer: 'Support tenant isolation, delegated admin, and API access management.', tags: ['advanced', 'saas'] },
+        { question: 'How do I implement OAuth2 for legacy systems?', answer: 'Use API gateways, protocol adapters, and token translation.', tags: ['advanced', 'legacy'] },
+        { question: 'How do I implement OAuth2 for serverless architectures?', answer: 'Use JWTs, validate tokens in functions, and manage secrets securely.', tags: ['advanced', 'serverless'] },
+        { question: 'How do I implement OAuth2 for cross-domain SSO?', answer: 'Use federated identity, trust relationships, and secure cookies.', tags: ['advanced', 'cross-domain'] },
+        { question: 'How do I implement OAuth2 for partner integrations?', answer: 'Use partner-specific clients, scopes, and consent flows.', tags: ['advanced', 'partner'] },
+      ],
+    },
   ];
 
-  const getDifficultyColor = (difficulty) => {
-    switch (difficulty) {
-      case 'Basic': return '#28a745';
-      case 'Advanced': return '#ffc107';
-      case 'Expert': return '#dc3545';
-      default: return '#6c757d';
-    }
-  };
+  const filteredCategories = faqCategories.map(category => ({
+    ...category,
+    questions: category.questions.filter(q => 
+      q.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      q.answer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      q.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+  })).filter(category => category.questions.length > 0);
 
-  const getCategoryColor = (category) => {
-    const colors = {
-      'JWT Security': '#e74c3c',
-      'Token Storage': '#3498db',
-      'Key Management': '#f39c12',
-      'PKCE': '#9b59b6',
-      'Token Types': '#1abc9c',
-      'Multi-tenancy': '#34495e',
-      'Authorization': '#e67e22',
-      'Mobile Security': '#2ecc71',
-      'Session Management': '#95a5a6',
-      'Monitoring': '#8e44ad',
-      'OAuth2 Flow': '#16a085',
-      'JWT Revocation': '#c0392b',
-      'Security Risks': '#d35400',
-      'Grant Types': '#27ae60',
-      'Microservices Security': '#2980b9',
-      'Multi-Provider': '#f1c40f',
-      'Performance': '#e74c3c',
-      'Serverless': '#3498db',
-      'Security': '#e67e22',
-      'Architecture': '#9b59b6',
-      'Blockchain': '#1abc9c',
-      'IoT Security': '#34495e',
-      'Quantum Security': '#e74c3c',
-      'Edge Computing': '#3498db'
-    };
-    return colors[category] || '#6c757d';
-  };
+  const allTags = [...new Set(faqCategories.flatMap(cat => cat.questions.flatMap(q => q.tags)))];
+
+  const additionalResources = [
+    {
+      title: 'Official Documentation',
+      icon: '📚',
+      items: [
+        'OAuth2 RFC 6749',
+        'OpenID Connect Core 1.0',
+        'OAuth2 Security Best Practices',
+        'PKCE RFC 7636'
+      ]
+    },
+    {
+      title: 'Implementation Guides',
+      icon: '🔧',
+      items: [
+        'Spring Security OAuth2',
+        'React OIDC Client',
+        'OAuth2 Provider Setup',
+        'Security Testing Tools'
+      ]
+    },
+    {
+      title: 'Security Tools',
+      icon: '🛡️',
+      items: [
+        'OWASP ZAP',
+        'Burp Suite',
+        'OAuth2 Playground',
+        'JWT.io Debugger'
+      ]
+    }
+  ];
+
+  const filteredQuestions = faqCategories[activeCategory].questions.filter(q =>
+    q.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    q.answer.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="faq-container">
-      <div className="faq-header">
-        <h1>🔍 OAuth2 & OIDC Interview Questions</h1>
-        <p>Comprehensive Q&A covering basic to expert-level concepts</p>
+      {/* Simple Heading */}
+      <h2 className="faq-simple-heading">OAuth2 & OIDC Interview Questions</h2>
+
+      {/* Search Bar */}
+      <div className="faq-search-bar">
+        <input
+          type="text"
+          className="faq-search-input"
+          placeholder="Search questions or answers..."
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+        />
       </div>
 
-      <div className="faq-categories">
-        {categories.map((category) => (
+      {/* Category Tabs */}
+      <div className="category-nav">
+        {faqCategories.map((cat, idx) => (
           <button
-            key={category.id}
-            className={`category-btn ${activeCategory === category.id ? 'active' : ''}`}
-            onClick={() => setActiveCategory(category.id)}
+            key={cat.title}
+            className={`category-btn${activeCategory === idx ? ' active' : ''}`}
+            onClick={() => {
+              setActiveCategory(idx);
+              setOpenItem(null);
+            }}
           >
-            <span className="category-icon">{category.icon}</span>
-            <span className="category-name">{category.name}</span>
-            <span className="category-count">{category.count}</span>
+            <span className="category-btn-icon" role="img" aria-label="icon">{cat.icon}</span>
+            {cat.title.replace('OAuth2 ', '')}
+            <span className="category-badge">{cat.questions.length}</span>
           </button>
         ))}
       </div>
 
-      <div className="faq-content">
-        <div className="faq-grid">
-          {faqData[activeCategory].map((item) => (
-            <div key={item.id} className="faq-card">
-              <div 
-                className={`faq-question ${expandedQuestions.has(item.id) ? 'expanded' : ''}`}
-                onClick={() => toggleQuestion(item.id)}
-              >
-                <div className="question-header">
-                  <div className="question-meta">
-                    <span 
-                      className="difficulty-badge"
-                      style={{ backgroundColor: getDifficultyColor(item.difficulty) }}
-                    >
-                      {item.difficulty}
-                    </span>
-                    <span 
-                      className="category-badge"
-                      style={{ backgroundColor: getCategoryColor(item.category) }}
-                    >
-                      {item.category}
-                    </span>
-                  </div>
-                  <div className="question-toggle">
-                    {expandedQuestions.has(item.id) ? '−' : '+'}
-                  </div>
+      {/* FAQ Grid */}
+      <div className="faq-grid">
+        {filteredQuestions.map((q, i) => {
+          const key = `${activeCategory}-${i}`;
+          const isOpen = openItem === key;
+          return (
+            <div className={`faq-card${isOpen ? ' open' : ''}`} key={key}>
+              <div className="faq-card-header-row">
+                <div className="faq-card-badges">
+                  {q.tags && q.tags.map(tag => (
+                    <span className="faq-badge tag" key={tag}>{tag.toUpperCase()}</span>
+                  ))}
                 </div>
-                <h3 className="question-text">{item.question}</h3>
+                <span
+                  className={`faq-toggle-icon${isOpen ? ' open' : ''}`}
+                  onClick={() => setOpenItem(isOpen ? null : key)}
+                  tabIndex={0}
+                  role="button"
+                  aria-expanded={isOpen}
+                  aria-label={isOpen ? 'Collapse answer' : 'Expand answer'}
+                >
+                  {isOpen ? <>&#8722;</> : <>&#43;</>}
+                </span>
               </div>
-              
-              <div className={`faq-answer ${expandedQuestions.has(item.id) ? 'expanded' : ''}`}>
-                <div className="answer-content">
-                  <p>{item.answer}</p>
+              <div className="faq-question-text">{q.question}</div>
+              {isOpen && (
+                <div className="faq-answer open"> 
+                  <div className="faq-answer-content">
+                    <div style={{marginTop: '1.1rem'}}>{q.answer}</div>
+                  </div>
                 </div>
-                <div className="answer-footer">
-                  <span className="answer-tip">💡 Tip: This is a common interview question!</span>
-                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Section Divider before Additional Resources */}
+      <hr className="faq-section-divider" />
+
+      {/* Additional Resources */}
+      <section className="section">
+        <div className="section-header">
+          <h2 className="section-title">Additional Resources</h2>
+          <p className="section-subtitle">
+            Further reading and tools to enhance your OAuth2 knowledge and implementation
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {additionalResources.map((resource, index) => (
+            <div key={index} className="content-section group hover:shadow-lg transition-all duration-300">
+              <div className="text-center mb-4">
+                <div className="text-4xl mb-3">{resource.icon}</div>
+                <h3 className="text-lg font-semibold text-primary">{resource.title}</h3>
               </div>
+              <ul className="space-y-3">
+                {resource.items.map((item, itemIndex) => (
+                  <li key={itemIndex} className="flex items-center gap-3 text-secondary group-hover:text-primary transition-colors">
+                    <span className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></span>
+                    <span className="hover:underline cursor-pointer">{item}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>
-      </div>
+      </section>
 
-      <div className="faq-footer">
-        <div className="faq-stats">
-          <div className="stat-item">
-            <span className="stat-number">{Object.values(faqData).flat().length}</span>
-            <span className="stat-label">Total Questions</span>
+      {/* Quick Reference */}
+      <section className="section">
+        <div className="section-header">
+          <h2 className="section-title">Quick Reference</h2>
+          <p className="section-subtitle">
+            Essential OAuth2 concepts and terminology for quick reference
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="content-section">
+            <h3 className="text-lg font-semibold mb-4 text-primary">OAuth2 Terms</h3>
+            <div className="space-y-4">
+              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <span className="font-medium text-blue-700">Resource Owner:</span>
+                <span className="text-blue-600 ml-2">The user who owns the resource</span>
+              </div>
+              <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                <span className="font-medium text-green-700">Client:</span>
+                <span className="text-green-600 ml-2">The application requesting access</span>
+              </div>
+              <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                <span className="font-medium text-purple-700">Authorization Server:</span>
+                <span className="text-purple-600 ml-2">Issues tokens after user consent</span>
+              </div>
+              <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                <span className="font-medium text-orange-700">Resource Server:</span>
+                <span className="text-orange-600 ml-2">Hosts protected resources</span>
+              </div>
+            </div>
           </div>
-          <div className="stat-item">
-            <span className="stat-number">{new Set(Object.values(faqData).flat().map(q => q.category)).size}</span>
-            <span className="stat-label">Categories</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-number">3</span>
-            <span className="stat-label">Difficulty Levels</span>
+
+          <div className="content-section">
+            <h3 className="text-lg font-semibold mb-4 text-primary">Common Scopes</h3>
+            <div className="space-y-4">
+              <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+                <span className="font-medium text-indigo-700">openid:</span>
+                <span className="text-indigo-600 ml-2">OpenID Connect authentication</span>
+              </div>
+              <div className="p-4 bg-pink-50 rounded-lg border border-pink-200">
+                <span className="font-medium text-pink-700">profile:</span>
+                <span className="text-pink-600 ml-2">Basic profile information</span>
+              </div>
+              <div className="p-4 bg-teal-50 rounded-lg border border-teal-200">
+                <span className="font-medium text-teal-700">email:</span>
+                <span className="text-teal-600 ml-2">Email address access</span>
+              </div>
+              <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
+                <span className="font-medium text-amber-700">offline_access:</span>
+                <span className="text-amber-600 ml-2">Refresh token access</span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="section">
+        <div className="content-section bg-gradient-to-r from-primary to-primary-600 text-white rounded-xl p-8">
+          <div className="text-center">
+            <h3 className="text-2xl font-bold mb-4">FAQ Statistics</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <div className="text-3xl font-bold mb-2">{faqCategories.length}</div>
+                <div className="text-primary-100">Categories</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold mb-2">{faqCategories.reduce((acc, cat) => acc + cat.questions.length, 0)}</div>
+                <div className="text-primary-100">Questions</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold mb-2">{allTags.length}</div>
+                <div className="text-primary-100">Topics</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };
